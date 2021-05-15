@@ -1,0 +1,22 @@
+version: "3"
+
+services:
+  opencrags-rest-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: opencrags-rest-api
+    restart: always
+    # volumes:
+    #   - ./data:/app/data
+    ports:
+      - '80:8000'
+        #    environment:
+        #DB: "mongodb://db:27017"
+
+      #  db:
+      #   restart: always
+      # image: mongo
+      # volumes:
+      #  - ./db-data:/data/db
+
