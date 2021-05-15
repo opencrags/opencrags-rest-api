@@ -30,6 +30,14 @@ app = FastAPI(
     version="0.0.0",
 )
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 @app.get("/", status_code=status.HTTP_303_SEE_OTHER, include_in_schema=False)
 def redirect_to_docs():
