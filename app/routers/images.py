@@ -63,3 +63,13 @@ def view_image(
 ):
     pass
 
+
+@router.get(
+    "/images",
+    response_model=List[IdentifiedImage],
+    status_code=status.HTTP_200_OK,
+)
+def list_images_for_a_climb(
+    climd_id: UUID,
+):
+    pass
