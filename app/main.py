@@ -13,6 +13,7 @@ from enum import Enum
 from typing import List, Union, Literal, Optional
 
 from app.routers import (
+    login,
     ascents,
     climbs,
     crags,
@@ -44,6 +45,7 @@ def redirect_to_docs():
     return RedirectResponse(url="/docs")
 
 
+app.include_router(login.router)
 app.include_router(crags.router)
 app.include_router(sectors.router)
 app.include_router(images.router)
