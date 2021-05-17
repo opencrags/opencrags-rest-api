@@ -17,6 +17,7 @@ from app.routers import (
     ascents,
     climbs,
     crags,
+    lines,
     grade_votes,
     images,
     quick_search,
@@ -49,6 +50,7 @@ app.include_router(login.router)
 app.include_router(crags.router)
 app.include_router(sectors.router)
 app.include_router(images.router)
+app.include_router(lines.router)
 app.include_router(climbs.router)
 app.include_router(grade_votes.router)
 app.include_router(ascents.router)
