@@ -6,19 +6,21 @@ from typing import Optional
 auth = Auth0(
     domain=os.environ["AUTH0_DOMAIN"],
     api_audience=os.environ["AUTH0_API_AUDIENCE"],
-    auto_error=False,
-    scope_auto_error=False,
 )
+guest_auth = Auth0(
+    domain=os.environ["AUTH0_DOMAIN"],
+    api_audience=os.environ["AUTH0_API_AUDIENCE"],
+    auto_error=False,
+)
+
 router = APIRouter()
-
-
-@router.get("/public")
-def get_public():
-    return {"message": "Anonymous user"}
 
 
 @router.get("/secure", dependencies=[Depends(auth.implicit_scheme)])
 def get_secure(
-    user: Optional[Auth0User] = Security(auth.get_user)
+    user: Optional[Auth0User] = Security(guest_auth.get_user)
 ):
-    return {"message": f"{user}"}
+    if user is None:
+       return {"message": "public user"}
+    
+    return {"message": f"private user {user}"}
