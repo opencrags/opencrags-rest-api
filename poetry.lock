@@ -69,7 +69,7 @@ requests = "*"
 type = "git"
 url = "https://github.com/samedii/fastapi-auth0.git"
 reference = "master"
-resolved_reference = "e34506b38769df264abefc5b428988142608400b"
+resolved_reference = "43d514cf899f91a8d95973f65ab65a0183a76969"
 
 [[package]]
 name = "h11"
