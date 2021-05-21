@@ -3,3 +3,6 @@ Dockerfile
 README.md
 .cache
 PACKAGR_TOKEN
+data
+dev.env
+prod.env

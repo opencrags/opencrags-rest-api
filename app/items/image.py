@@ -9,7 +9,6 @@ class ImageId(BaseModel):
 
 
 class ImageInfo(BaseModel):
-    location: str
     sector_id: Optional[UUID]
 
 

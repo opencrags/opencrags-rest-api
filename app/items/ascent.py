@@ -1,6 +1,7 @@
 from uuid import UUID
 import datetime
 from pydantic import BaseModel, Field, conint
+from typing import Optional
 
 
 class AscentId(BaseModel):

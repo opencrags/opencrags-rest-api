@@ -3,7 +3,7 @@ from pydantic import BaseModel, Field
 
 
 class RatingId(BaseModel):
-    climb_id: UUID = Field(..., alias="id")
+    rating_id: UUID = Field(..., alias="id")
 
 
 class Rating(BaseModel):

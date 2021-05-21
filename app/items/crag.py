@@ -8,7 +8,7 @@ class CragId(BaseModel):
 
 class Crag(BaseModel):
     name: str
-    location_polygon: str
+    # location_polygon: str  # calculated
 
 
 class IdentifiedCrag(CragId, Crag):

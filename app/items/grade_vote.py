@@ -1,14 +1,17 @@
 from uuid import UUID
 from pydantic import BaseModel, Field
 
+from app.items.grade import Grade
+
 
 class GradeVoteId(BaseModel):
-    crag_id: UUID = Field(..., alias="id")
+    grade_vote_id: UUID = Field(..., alias="id")
 
 
 class GradeVote(BaseModel):
-    name: str
-    location_polygon: str
+    user_id: UUID
+    climb_id: UUID
+    grade: Grade
 
 
 class IdentifiedGradeVote(GradeVoteId, GradeVote):

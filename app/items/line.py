@@ -3,14 +3,13 @@ from pydantic import BaseModel, Field
 
 
 class LineId(BaseModel):
-    crag_id: UUID = Field(..., alias="id")
+    line_id: UUID = Field(..., alias="id")
 
 
 class Line(BaseModel):
     climb_id: UUID
     image_id: UUID
-    name: str
-    line_path: str
+    line_path: str # list of coordinates?
 
 
 class IdentifiedLine(LineId, Line):
