@@ -4,7 +4,6 @@ from fastapi.testclient import TestClient
 from starlette.responses import RedirectResponse
 import random
 import io
-from uuid import UUID
 import base64
 import json
 import PIL
@@ -13,6 +12,7 @@ from enum import Enum
 from typing import List, Union, Literal, Optional
 
 from app.items.crag import Crag, CragId, IdentifiedCrag
+from app import mongo
 
 
 router = APIRouter(
@@ -26,7 +26,7 @@ router = APIRouter(
     status_code=status.HTTP_201_CREATED,
 )
 def add_crag(crag: Crag):
-    crag_id = UUID(int=random.getrandbits(128))
+    crag_id = mongo.db.crags.insert_one(crag.dict()).inserted_id
     return CragId(id=crag_id)
 
 
@@ -35,7 +35,7 @@ def add_crag(crag: Crag):
     response_model=Crag,
     status_code=status.HTTP_200_OK,
 )
-def update_crag(crag_id: UUID, crag: Crag):
+def update_crag(crag_id: mongo.ObjectId, crag: Crag):
     crag_id = UUID(int=random.getrandbits(128))
     return CragId(id=crag_id)
 
@@ -45,7 +45,7 @@ def update_crag(crag_id: UUID, crag: Crag):
     status_code=status.HTTP_200_OK,
 )
 def remove_crag(
-    crag_id: UUID,
+    crag_id: mongo.ObjectId,
 ):
     return Response(status_code=status.HTTP_200_OK)
 

@@ -1,9 +1,10 @@
-from uuid import UUID
 from pydantic import BaseModel, Field
+
+from app import mongo
 
 
 class CragId(BaseModel):
-    crag_id: UUID = Field(..., alias="id")
+    crag_id: mongo.ObjectId = Field(..., alias="id")
 
 
 class Crag(BaseModel):
