@@ -7,6 +7,8 @@ class LineId(BaseModel):
 
 
 class Line(BaseModel):
+    climb_id: UUID
+    image_id: UUID
     name: str
     line_path: str
 

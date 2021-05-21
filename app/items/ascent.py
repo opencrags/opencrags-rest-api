@@ -1,5 +1,6 @@
 from uuid import UUID
-from pydantic import BaseModel, Field
+import datetime
+from pydantic import BaseModel, Field, conint
 
 
 class AscentId(BaseModel):
@@ -9,6 +10,10 @@ class AscentId(BaseModel):
 class Ascent(BaseModel):
     user_id: UUID
     climb_id: UUID
+    date: datetime.date
+    flash: bool = False
+    first_ascent: bool = False
+    attempts: Optional[conint(ge=1)]
 
 
 class IdentifiedAscent(AscentId, Ascent):
