@@ -12,7 +12,7 @@ from pydantic import BaseModel, validator, Field
 from enum import Enum
 from typing import List, Union, Literal, Optional
 
-from app.items.crag import IdentifiedCrag
+from app.items.crag import Crag
 from app.items.climb import IdentifiedClimb
 
 
@@ -23,7 +23,7 @@ router = APIRouter(
 
 @router.get(
     "/quickSearch",
-    response_model=List[Union[IdentifiedClimb, IdentifiedCrag]],
+    response_model=List[Union[Crag, IdentifiedClimb]],
     status_code=status.HTTP_200_OK,
 )
 def search_crags_sectors_and_climbs_by_name(

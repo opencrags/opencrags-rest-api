@@ -6,3 +6,4 @@ PACKAGR_TOKEN
 data
 dev.env
 prod.env
+.venv

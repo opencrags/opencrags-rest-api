@@ -12,7 +12,7 @@ from pydantic import BaseModel, validator, Field
 from enum import Enum
 from typing import List, Union, Literal, Optional
 
-from app.items.crag import Crag, CragId, IdentifiedCrag
+from app.items.crag import Crag
 from app.items.sector import Sector, SectorId, IdentifiedSector
 
 
@@ -23,7 +23,7 @@ router = APIRouter(
 
 @router.post(
     "/crags/{crag_id}/sectors",
-    response_model=Crag,
+    response_model=Sector,
     status_code=status.HTTP_201_CREATED,
 )
 def add_sector_to_crag(crag_id: UUID, sector: Sector):

@@ -11,7 +11,7 @@ from pydantic import BaseModel, validator, Field
 from enum import Enum
 from typing import List, Union, Literal, Optional
 
-from app.items.crag import Crag, CragId, IdentifiedCrag
+from app.items.crag import Crag
 from app import mongo
 
 
@@ -20,14 +20,14 @@ router = APIRouter(
 )
 
 
-@router.post(
+@router.get(
     "/crags",
-    response_model=CragId,
-    status_code=status.HTTP_201_CREATED,
+    response_model=List[Crag],
+    status_code=status.HTTP_200_OK,
 )
-def add_crag(crag: Crag):
-    crag_id = mongo.db.crags.insert_one(crag.dict()).inserted_id
-    return CragId(id=crag_id)
+async def list_crags():
+    crags = await mongo.engine.find(Crag)
+    return crags
 
 
 @router.put(
@@ -35,26 +35,34 @@ def add_crag(crag: Crag):
     response_model=Crag,
     status_code=status.HTTP_200_OK,
 )
-def update_crag(crag_id: mongo.ObjectId, crag: Crag):
-    crag_id = UUID(int=random.getrandbits(128))
-    return CragId(id=crag_id)
+async def add_or_update_crag(crag: Crag):
+    await mongo.engine.save(crag)
+    return crag
 
 
 @router.delete(
     "/crags/{crag_id}",
     status_code=status.HTTP_200_OK,
 )
-def remove_crag(
+async def remove_crag(
     crag_id: mongo.ObjectId,
 ):
+    crag = await mongo.engine.find_one(Crag, Crag.id == crag_id)
+    if crag is None:
+        raise HTTPException(404)
+    await mongo.engine.delete(crag)
     return Response(status_code=status.HTTP_200_OK)
 
 
 @router.get(
     "/crags/{crag_id}",
-    response_model=IdentifiedCrag,
+    response_model=Crag,
     status_code=status.HTTP_200_OK,
 )
-def view_crag():
-    pass
-
+async def view_crag(
+    crag_id: mongo.ObjectId,
+):
+    crag = await mongo.engine.find_one(Crag, Crag.id == crag_id)
+    if crag is None:
+        raise HTTPException(404)
+    return crag
