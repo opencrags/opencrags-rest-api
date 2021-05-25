@@ -57,17 +57,17 @@ def list_crags():
 def add_crag(crag: CreateCrag):
     user_id = uuid4() #  TODO: use real user
 
-    if len(crag.crag_name_votes) != 1:
+    if len(crag.name_votes) != 1:
         raise HTTPException(status.HTTP_400_BAD_REQUEST)
 
     crag = Crag(
-        **crag.dict(exclude={"crag_name_votes"}),
-        crag_name_votes=[
+        **crag.dict(exclude={"name_votes"}),
+        name_votes=[
             CragNameVote(
                 user_id=user_id,
-                **crag_name_vote.dict(),
+                **name_vote.dict(),
             )
-            for crag_name_vote in crag.crag_name_votes
+            for name_vote in crag.name_votes
         ],
         user_id=user_id,
     )
@@ -97,39 +97,28 @@ def remove_crag(
 def view_crag(
     crag_id: UUID,
 ):
-    print(crag_id)
-    mongo_crag = mongo.db.crags.find_one({"id": str(crag_id)})
-    print(mongo_crag)
+    mongo_crag = mongo.db.crags.find_one({"id": crag_id})
     if mongo_crag is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND)
 
-    # mongo_crag_name_votes = mongo.db.crag_name_votes.find_one({"crag_id": crag_id})
-    # if mongo_crag_name_votes is None:
-    #     mongo_crag_name_votes = list()
-
-    return Crag(
-        **mongo_crag,
-        # crag_name_votes=mongo_crag_name_votes,
-    )
+    return Crag(**mongo_crag)
 
 
 @router.post(
-    "/crags/{crag_id}/cragNameVotes",
+    "/crags/{crag_id}/name-votes",
     response_model=CragNameVote,
     status_code=status.HTTP_200_OK,
 )
-def add_or_update_crag_name_vote(
+def add_name_vote(
     crag_id: UUID,
-    crag_name_vote: CreateCragNameVote,
+    name_vote: CreateCragNameVote,
 ):
-    mongo_crag_name_vote = mongo.db.crag_name_votes.find_one({"id": crag_id})
-    if mongo_crag_name_vote is None:
-        raise HTTPException(status.HTTP_404_NOT_FOUND)
-
-    crag_name_vote["vote"]["user_id"] = uuid4()  # TODO
-    crag_name_vote = CragNameVote(
-        crag_id=crag_id,
-        **crag_name_vote,
+    name_vote = CragNameVote(
+        user_id=uuid4(), #  TODO: replace with real user id
+        **name_vote.dict(),
     )
-    mongo.db.crag_name_votes.insert_one(crag_name_vote)
-    return crag_name_vote
+    mongo_crag = mongo.db.crags.find_one({"id": crag_id})
+    crag = Crag(**mongo_crag)
+    crag.name_votes.append(name_vote)
+    mongo.db.crags.replace_one({"id": crag_id}, crag.dict())
+    return name_vote
