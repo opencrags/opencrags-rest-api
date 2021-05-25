@@ -1,8 +1,9 @@
-import struct
-import pydantic
-from odmantic import AIOEngine, Model, EmbeddedModel, ObjectId, Field
-from odmantic.bson import BaseBSONModel
-from motor.motor_asyncio import AsyncIOMotorClient
+from pymongo import MongoClient
 
-client = AsyncIOMotorClient("mongodb://mongo:27017/")
-engine = AIOEngine(motor_client=client, database="opencrags")
+client = MongoClient('mongodb://mongo:27017/')
+db = client.wire_annotations
+
+__all__ = [
+    "client",
+    "db",
+]

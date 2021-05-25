@@ -12,7 +12,6 @@ requests = "^2.25.1"
 Pillow = "^8.2.0"
 fastapi-auth0 = "^0.2.1"
 pymongo = "^3.11.4"
-odmantic = "^0.3.5"
 
 [tool.poetry.dev-dependencies]
 

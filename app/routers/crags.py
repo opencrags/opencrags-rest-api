@@ -2,7 +2,7 @@ from fastapi import APIRouter, Response, status, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.testclient import TestClient
 from starlette.responses import RedirectResponse
-import random
+from uuid import UUID, uuid4
 import io
 import base64
 import json
@@ -12,8 +12,6 @@ from enum import Enum
 from typing import List, Union, Literal, Optional
 
 from app.items.crag import (
-    MongoCrag,
-    MongoCragNameVote,
     CreateCrag,
     Crag,
     CreateCragNameVote,
@@ -42,14 +40,11 @@ router = APIRouter(
     response_model=List[Crag],
     status_code=status.HTTP_200_OK,
 )
-async def list_crags():
-    mongo_crags = await mongo.engine.find(MongoCrag)
+def list_crags():
+    mongo_crags = mongo.db.crags.find()
 
     return [
-        Crag(
-            **mongo_crag.dict(),
-            crag_name_votes=list(),  # TODO
-        )
+        Crag(**mongo_crag)
         for mongo_crag in mongo_crags
     ]
 
@@ -59,28 +54,38 @@ async def list_crags():
     response_model=Crag,
     status_code=status.HTTP_201_CREATED,
 )
-async def add_crag(crag: CreateCrag):
-    mongo_crag = MongoCrag(
-        user_id=mongo.ObjectId(), # TODO: use real user
+def add_crag(crag: CreateCrag):
+    user_id = uuid4() #  TODO: use real user
+
+    if len(crag.crag_name_votes) != 1:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST)
+
+    crag = Crag(
+        **crag.dict(exclude={"crag_name_votes"}),
+        crag_name_votes=[
+            CragNameVote(
+                user_id=user_id,
+                **crag_name_vote.dict(),
+            )
+            for crag_name_vote in crag.crag_name_votes
+        ],
+        user_id=user_id,
     )
-    await mongo.engine.save(mongo_crag)
-    return Crag(
-        **mongo_crag.dict(),
-        crag_name_votes=list(),
-    )
+    mongo.db.crags.insert_one(crag.dict())
+    return crag
 
 
 @router.delete(
     "/crags/{crag_id}",
     status_code=status.HTTP_200_OK,
 )
-async def remove_crag(
-    crag_id: mongo.ObjectId,
+def remove_crag(
+    crag_id: UUID,
 ):
-    mongo_crag = await mongo.engine.find_one(MongoCrag, MongoCrag.id == crag_id)
+    mongo_crag = mongo.db.crags.find_one({"id": crag_id})
     if mongo_crag is None:
-        raise HTTPException(404)
-    await mongo.engine.delete(mongo_crag)
+        raise HTTPException(status.HTTP_404_NOT_FOUND)
+    mongo.db.crags.delete_one({"id": crag_id})
     return Response(status_code=status.HTTP_200_OK)
 
 
@@ -89,15 +94,22 @@ async def remove_crag(
     response_model=Crag,
     status_code=status.HTTP_200_OK,
 )
-async def view_crag(
-    crag_id: mongo.ObjectId,
+def view_crag(
+    crag_id: UUID,
 ):
-    mongo_crag = await mongo.engine.find_one(MongoCrag, MongoCrag.id == crag_id)
+    print(crag_id)
+    mongo_crag = mongo.db.crags.find_one({"id": str(crag_id)})
+    print(mongo_crag)
     if mongo_crag is None:
-        raise HTTPException(404)
+        raise HTTPException(status.HTTP_404_NOT_FOUND)
+
+    # mongo_crag_name_votes = mongo.db.crag_name_votes.find_one({"crag_id": crag_id})
+    # if mongo_crag_name_votes is None:
+    #     mongo_crag_name_votes = list()
+
     return Crag(
-        **mongo_crag.dict(),
-        crag_name_votes=list(),  # TODO
+        **mongo_crag,
+        # crag_name_votes=mongo_crag_name_votes,
     )
 
 
@@ -106,19 +118,18 @@ async def view_crag(
     response_model=CragNameVote,
     status_code=status.HTTP_200_OK,
 )
-async def add_or_update_crag_name_vote(
-    crag_id: mongo.ObjectId,
+def add_or_update_crag_name_vote(
+    crag_id: UUID,
     crag_name_vote: CreateCragNameVote,
 ):
-    crag = await mongo.engine.find_one(MongoCrag, MongoCrag.id == crag_id)
-    if crag is None:
-        raise HTTPException(404)
+    mongo_crag_name_vote = mongo.db.crag_name_votes.find_one({"id": crag_id})
+    if mongo_crag_name_vote is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND)
 
-    crag_name_vote = crag_name_vote.dict()
-    crag_name_vote["vote"]["user_id"] = mongo.ObjectId()  # TODO
-    crag_name_vote = MongoCragNameVote(
+    crag_name_vote["vote"]["user_id"] = uuid4()  # TODO
+    crag_name_vote = CragNameVote(
         crag_id=crag_id,
         **crag_name_vote,
     )
-    await mongo.engine.save(crag_name_vote)
+    mongo.db.crag_name_votes.insert_one(crag_name_vote)
     return crag_name_vote

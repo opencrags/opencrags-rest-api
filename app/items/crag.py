@@ -1,55 +1,41 @@
 from datetime import datetime
+from uuid import UUID, uuid4
 from pydantic import BaseModel, Field
 from typing import List, Optional
 
-from app import mongo
 
 # Reuse for other items
-class CreateVote(mongo.BaseBSONModel):
+class CreateVote(BaseModel):
     public: bool = True
 
 
 class Vote(CreateVote):
+    vote_id: UUID = Field(default_factory=uuid4, alias="id")
     created: datetime = Field(default_factory=datetime.utcnow)
     modified: datetime = Field(default_factory=datetime.utcnow)
-    user_id: mongo.ObjectId
-    public: bool = True
-
-
-class MongoCragNameVote(mongo.Model):
-    crag_id: mongo.ObjectId
-    name: str
-    vote: Vote
+    user_id: UUID
 
 
 # POST /cragNameVotes
 # POST /crags/{crag_id}/nameVotes
-class CreateCragNameVote(mongo.BaseBSONModel):
+class CreateCragNameVote(CreateVote):
     name: str
-    vote: CreateVote
 
 
 # GET /crags/{crag_id}/nameVotes/{crag_name_vote_id}
-class CragNameVote(MongoCragNameVote):
+class CragNameVote(CreateCragNameVote, Vote):
     pass
-
-
-class MongoCrag(mongo.Model):
-    created: datetime = mongo.Field(default_factory=datetime.utcnow)
-    user_id: mongo.ObjectId
-    # polygon?
 
 
 # Add non mongo classes for more correct documentation?
 # POST /crags
-class CreateCrag(mongo.BaseBSONModel):
-    pass
+class CreateCrag(BaseModel):
+    crag_name_votes: List[CreateCragNameVote]
 
 # Nicer response model for viewing crags?
 # GET /crags/{crag_id}
-class Crag(mongo.BaseBSONModel):
-    crag_id: mongo.ObjectId = Field(..., alias="id")
-    created: datetime
-    user_id: mongo.ObjectId
+class Crag(BaseModel):
+    crag_id: UUID = Field(default_factory=uuid4, alias="id")
+    created: datetime = Field(default_factory=datetime.utcnow)
+    user_id: UUID
     crag_name_votes: List[CragNameVote]
-
