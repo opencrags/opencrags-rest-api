@@ -1,7 +1,7 @@
 from pymongo import MongoClient
 
 client = MongoClient('mongodb://mongo:27017/')
-db = client.wire_annotations
+db = client.opencrags
 
 __all__ = [
     "client",

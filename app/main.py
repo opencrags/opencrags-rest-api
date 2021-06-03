@@ -14,14 +14,12 @@ from typing import List, Union, Literal, Optional
 
 from app.routers import (
     login,
+    lines,
     ascents,
     climbs,
     crags,
-    lines,
-    grade_votes,
     images,
     quick_search,
-    ratings,
     sectors,
 )
 
@@ -50,9 +48,7 @@ app.include_router(login.router)
 app.include_router(crags.router)
 app.include_router(sectors.router)
 app.include_router(images.router)
-app.include_router(lines.router)
 app.include_router(climbs.router)
-app.include_router(grade_votes.router)
+app.include_router(lines.router)
 app.include_router(ascents.router)
-app.include_router(ratings.router)
 app.include_router(quick_search.router)

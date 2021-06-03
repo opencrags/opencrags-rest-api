@@ -9,6 +9,7 @@ class CreateVote(BaseModel):
 
 
 class Vote(CreateVote):
+    id: UUID = Field(default_factory=uuid4)
     user_id: UUID
     created: datetime = Field(default_factory=datetime.utcnow)
     modified: datetime = Field(default_factory=datetime.utcnow)

@@ -1,22 +1,25 @@
 version: "3"
 
 services:
-  api:
+  open-crags-rest-api:
     build:
       context: .
       dockerfile: Dockerfile
     container_name: opencrags-rest-api
     restart: always
+    volumes:
+      - ./app:/app/app
     depends_on:
-      - mongo
+      - open-crags-mongodb
     ports:
       - '8000:8000'
     environment:
-      DB: "mongodb://mongo:27017"
+      DB: "mongodb://open-crags-mongodb:27017"
     env_file:
-      - prod.env
+      - dev.env
+    command: ["/root/.poetry/bin/poetry", "run", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
 
-  mongo:
+  open-crags-mongodb:
     container_name: mongo
     image: mongo:4.4.5
     restart: always
@@ -24,21 +27,3 @@ services:
       - ./data:/data/db
     ports:
       - "27017:27017"
-
-  dev:
-    profiles: ["dev"]
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: opencrags-rest-api-dev
-    depends_on:
-      - mongo
-    volumes:
-      - ./app:/app/app
-    ports:
-      - '8000:8000'
-    environment:
-      DB: "mongodb://mongo:27017"
-    env_file:
-      - dev.env
-    command: ["/root/.poetry/bin/poetry", "run", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
