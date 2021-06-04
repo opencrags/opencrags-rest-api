@@ -1,1 +1,1 @@
-from app.create_api import create_api, Voted
+from app.create_api import create_api, VoteDefinition

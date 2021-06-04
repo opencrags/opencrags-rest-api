@@ -1,7 +1,7 @@
 from uuid import UUID
 from fastapi import APIRouter
 
-from app import create_api, Voted
+from app import create_api, VoteDefinition
 
 
 router = APIRouter(
@@ -9,23 +9,29 @@ router = APIRouter(
 )
 
 
+# TODO: only allow one line per image + climb
+
 create_api(
     router,
     model_name="Line",
     collection_name="lines",
     item_name="line",
+    statics=dict(
+        climb=UUID,
+        image=UUID,
+    ),
     voted=[
-        Voted(
+        VoteDefinition(
             model_name="ClimbVote",
             collection_name="climb_votes",
             item_name="climb_vote",
             type=UUID,
         ),
-        Voted(
-            model_name="LineQualityVote",
-            collection_name="quality_votes",
-            item_name="quality_vote",
-            type=int,
+        VoteDefinition(
+            model_name="LinePathVote",
+            collection_name="line_path_votes",
+            item_name="line_path_vote",
+            type=str,
         ),
     ]
 )

@@ -1,6 +1,8 @@
+from uuid import UUID
+from datetime import date
 from fastapi import APIRouter
 
-from app import create_api, Voted
+from app import create_api, VoteDefinition
 
 
 router = APIRouter(
@@ -13,12 +15,8 @@ create_api(
     model_name="Ascent",
     collection_name="ascents",
     item_name="ascent",
-    voted=[
-        Voted(
-            model_name="AscentNameVote",
-            collection_name="name_votes",
-            item_name="name_vote",
-            type=str,
-        )
-    ]
+    statics=dict(
+        climb_id=UUID,
+        ascent_date=date,
+    ),
 )

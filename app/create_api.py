@@ -9,11 +9,9 @@ import json
 import PIL
 from pydantic import BaseModel, validator, Field
 from enum import Enum
-from typing import List, Union, Literal, Optional
+from typing import List, Dict, Union, Literal, Optional, Any
 from datetime import datetime
 from pydantic import BaseModel, create_model
-from typing import Any
-
 
 from app import mongo
 
@@ -25,30 +23,33 @@ def rename(name):
     return decorator
 
 
-class Item(BaseModel):
+class ItemBase(BaseModel):
     id: UUID  #= Field(default_factory=uuid4)
     user_id: UUID
     created: datetime  #= Field(default_factory=datetime.utcnow)
 
-class Voted(BaseModel):
+
+class VoteDefinition(BaseModel):
     model_name: str
     collection_name: str
     item_name: str
     type: Any
+
 
 def create_api(
     router,
     model_name: str,
     collection_name: str,
     item_name: str,
-    voted: List[Voted],
+    statics: Dict[str, type] = dict(),
+    voted: List[VoteDefinition] = list(),
 ):
 
     vote_models = {
         v.model_name: create_model(
             v.model_name,
             value=(v.type, ...),
-            __base__=Item,
+            __base__=ItemBase,
         )
         for v in voted
     }
@@ -64,10 +65,23 @@ def create_api(
     MainModel = create_model(
         model_name,
         **{
+            name: (t, ...)
+            for name, t in statics.items()
+        },
+        **{
             v.collection_name: (List[vote_models[v.model_name]], ...)
             for v in voted
         },
-        __base__=Item,
+        __base__=ItemBase,
+    )
+
+    MainModelIn = create_model(
+        f"{model_name}In",
+        **{
+            name: (t, ...)
+            for name, t in statics.items()
+        },
+        __base__=ItemBase,
     )
 
     @router.get(
@@ -91,7 +105,9 @@ def create_api(
         status_code=status.HTTP_200_OK,
     )
     @rename(f"add_{item_name}")
-    def add_item():
+    def add_item(
+        model_in: MainModelIn
+    ):
         item = MainModel(
             id=uuid4(),
             user_id=uuid4(), # TODO

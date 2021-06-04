@@ -14,13 +14,14 @@ from datetime import datetime
 from pydantic import BaseModel, create_model
 from typing import Any
 
-from app import create_api, Voted
+from app import create_api, VoteDefinition
 
 
 router = APIRouter(
     tags=["crags"],
 )
 
+# TODO: area vote?
 
 create_api(
     router,
@@ -28,7 +29,7 @@ create_api(
     collection_name="crags",
     item_name="crag",
     voted=[
-        Voted(
+        VoteDefinition(
             model_name="CragNameVote",
             collection_name="name_votes",
             item_name="name_vote",
@@ -36,45 +37,3 @@ create_api(
         )
     ]
 )
-
-# POST /crags
-# POST /crags/{crag_id}/votes
-# POST /crags/{crag_id}/votes
-
-
-# this wont work when there are multiple thing to vote about?
-# POST /climbs/{climb_id}/gradeVotes
-# POST /climbs/{climb_id}/ratings
-
-# How to generalize this?
-
-# Crag
-#   name-vote
-#   area-vote
-
-# Sector
-#   name-vote
-#   area-vote
-
-# Climb
-#   name-vote
-#   coordinate-vote
-#   grade-vote
-#   rating-vote
-
-# Parking
-#   coordinate-vote
-
-# Approach
-#   path-vote
-
-# create_model(
-#     "Climb",
-#     votes={
-#         "name_vote": str,
-#         "coordinate_vote": Coordinate,
-#         "grade_vote": Grade,
-#         "rating_vote": int,
-#     }
-# )
-
