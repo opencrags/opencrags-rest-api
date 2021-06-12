@@ -117,7 +117,7 @@ def create_api_router(
     @router.post(
         f"/{collection_name}",
         response_model=MainModel,
-        status_code=status.HTTP_200_OK,
+        status_code=status.HTTP_201_CREATED,
         dependencies=[Depends(auth.implicit_scheme)],
     )
     @rename(f"add_{item_name}")
@@ -131,7 +131,7 @@ def create_api_router(
             created=datetime.utcnow(),
             **{v.collection_name: list() for v in voted},
         )
-        mongo.db[collection_name].save(item.dict())
+        mongo.db[collection_name].insert_one(item.dict())
 
         return item 
 
