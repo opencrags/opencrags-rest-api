@@ -1,5 +1,7 @@
 # opencrags-rest-api
 
+![database diagram](opencrags-diagram.png)
+
 ## Production
 
 ```bash

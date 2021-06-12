@@ -1,5 +1,7 @@
+from typing import Optional
 from uuid import UUID
 from datetime import date
+from pydantic import conint
 from fastapi import APIRouter
 
 from app import create_api, VoteDefinition
@@ -18,5 +20,7 @@ create_api(
     statics=dict(
         climb_id=UUID,
         ascent_date=date,
+        flash=bool,
+        attempts=Optional[conint(ge=1)],
     ),
 )

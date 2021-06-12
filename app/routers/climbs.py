@@ -32,5 +32,13 @@ create_api(
             item_name="grade_vote",
             type=str,  # TODO system + grade
         ),
+        VoteDefinition(
+            model_name="ClimbTypeVote",
+            collection_name="climb_type_votes",
+            item_name="climb_type_vote",
+            type=str,  # TODO enum: sport, boulder, partially bolted, trad, alpine
+        ),
+        # guide book grade?
+        # first ascent grade?
     ]
 )

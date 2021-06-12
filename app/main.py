@@ -21,12 +21,13 @@ from app.routers import (
     images,
     quick_search,
     sectors,
+    grades,
 )
 
 
 app = FastAPI(
     title="opencrags-rest-api",
-    description="Database of boulder problems and routes",
+    description="Database of boulder problems and lead routes",
     version="0.0.0",
 )
 
@@ -51,4 +52,5 @@ app.include_router(images.router)
 app.include_router(climbs.router)
 app.include_router(lines.router)
 app.include_router(ascents.router)
+app.include_router(grades.router)
 app.include_router(quick_search.router)

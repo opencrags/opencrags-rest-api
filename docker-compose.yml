@@ -1,7 +1,7 @@
 version: "3"
 
 services:
-  open-crags-rest-api:
+  opencrags-rest-api:
     build:
       context: .
       dockerfile: Dockerfile
@@ -10,17 +10,16 @@ services:
     volumes:
       - ./app:/app/app
     depends_on:
-      - open-crags-mongodb
+      - opencrags-mongodb
     ports:
       - '8000:8000'
     environment:
-      DB: "mongodb://open-crags-mongodb:27017"
+      DB: "mongodb://opencrags-mongodb:27017"
     env_file:
       - dev.env
     command: ["/root/.poetry/bin/poetry", "run", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
 
-  open-crags-mongodb:
-    container_name: mongo
+  opencrags-mongodb:
     image: mongo:4.4.5
     restart: always
     volumes:

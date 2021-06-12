@@ -22,12 +22,6 @@ create_api(
     ),
     voted=[
         VoteDefinition(
-            model_name="ClimbVote",
-            collection_name="climb_votes",
-            item_name="climb_vote",
-            type=UUID,
-        ),
-        VoteDefinition(
             model_name="LinePathVote",
             collection_name="line_path_votes",
             item_name="line_path_vote",

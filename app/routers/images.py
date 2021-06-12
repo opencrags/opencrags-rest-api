@@ -19,3 +19,5 @@ create_api(
         base64_image=str,
     ),
 )
+
+# TODO: Custom api? uri: /static/images/{image_id}.png
