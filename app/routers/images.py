@@ -1,16 +1,10 @@
 from uuid import UUID
 from fastapi import APIRouter
 
-from app import create_api, VoteDefinition
+from app import create_api_router, VoteDefinition
 
 
-router = APIRouter(
-    tags=["images"],
-)
-
-
-create_api(
-    router,
+router = create_api_router(
     model_name="Image",
     collection_name="images",
     item_name="image",

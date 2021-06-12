@@ -4,16 +4,10 @@ from datetime import date
 from pydantic import conint
 from fastapi import APIRouter
 
-from app import create_api, VoteDefinition
+from app import create_api_router, VoteDefinition
 
 
-router = APIRouter(
-    tags=["ascents"],
-)
-
-
-create_api(
-    router,
+router = create_api_router(
     model_name="Ascent",
     collection_name="ascents",
     item_name="ascent",

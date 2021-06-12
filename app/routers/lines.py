@@ -1,18 +1,12 @@
 from uuid import UUID
 from fastapi import APIRouter
 
-from app import create_api, VoteDefinition
-
-
-router = APIRouter(
-    tags=["lines"],
-)
+from app import create_api_router, VoteDefinition
 
 
 # TODO: only allow one line per image + climb
 
-create_api(
-    router,
+router = create_api_router(
     model_name="Line",
     collection_name="lines",
     item_name="line",

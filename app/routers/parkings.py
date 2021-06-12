@@ -1,15 +1,9 @@
 from fastapi import APIRouter
 
-from app import create_api, VoteDefinition
+from app import create_api_router, VoteDefinition
 
 
-router = APIRouter(
-    tags=["parkings"],
-)
-
-
-create_api(
-    router,
+router = create_api_router(
     model_name="Parking",
     collection_name="parkings",
     item_name="parking",

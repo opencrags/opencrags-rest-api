@@ -2,17 +2,12 @@ from uuid import UUID
 from fastapi import APIRouter
 from typing import List
 
-from app import create_api, VoteDefinition
+from app import create_api_router, VoteDefinition
 
-
-router = APIRouter(
-    tags=["sectors"],
-)
 
 # TODO: area vote?
 
-create_api(
-    router,
+router = create_api_router(
     model_name="Sector",
     collection_name="sectors",
     item_name="sector",
