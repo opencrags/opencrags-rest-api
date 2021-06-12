@@ -17,6 +17,12 @@ source code is mounted and the server watches for changes.
 docker-compose up dev
 ```
 
+### Testing
+
+```bash
+docker-compose -f docker-compose.test.yml up --build --exit-code-from opencrags-rest-api
+```
+
 ### Install
 
 If you want to change the packages then you need to setup the environment.

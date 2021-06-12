@@ -1,0 +1,23 @@
+version: "3"
+
+services:
+  opencrags-rest-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: opencrags-rest-api
+    volumes:
+      - ./app:/app/app
+      - ./tests:/app/tests
+    depends_on:
+      - opencrags-mongodb
+    environment:
+      DB: "mongodb://opencrags-mongodb:27017"
+    env_file:
+      - dev.env
+    command: ["/root/.poetry/bin/poetry", "run", "pytest", "tests"]
+
+  opencrags-mongodb:
+    image: mongo:4.4.5
+    volumes:
+      - ./tests/data:/data/db

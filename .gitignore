@@ -13,6 +13,7 @@ PACKAGR_TOKEN
 data
 dev.env
 prod.env
+tests/data
 
 AUTHORS
 ChangeLog

@@ -7,3 +7,4 @@ data
 dev.env
 prod.env
 .venv
+tests/data
