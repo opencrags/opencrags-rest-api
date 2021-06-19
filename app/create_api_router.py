@@ -40,6 +40,8 @@ class ItemBase(BaseModel):
     created: datetime  #= Field(default_factory=datetime.utcnow)
 
 
+# TODO: vote base should include "public"
+
 class VoteDefinition(BaseModel):
     model_name: str
     collection_name: str
@@ -133,7 +135,7 @@ def create_api_router(
         )
         mongo.db[collection_name].insert_one(item.dict())
 
-        return item 
+        return item
 
     # TODO: need to create functions dynamically if we want custom argument names
 
@@ -260,7 +262,5 @@ def create_api_router(
                 return add_vote(item_id, vote, user)
             else:
                 return remove_response
-
-        return router
 
     return router

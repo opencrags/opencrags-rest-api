@@ -15,3 +15,6 @@ router = create_api_router(
 )
 
 # TODO: Custom api? uri: /static/images/{image_id}.png
+# {
+#     image_uri: f"http://opencrags.com/static/images/{image_id}.png"
+# }

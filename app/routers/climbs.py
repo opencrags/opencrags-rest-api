@@ -32,6 +32,30 @@ router = create_api_router(
             item_name="climb_type_vote",
             type=str,  # TODO enum: sport, boulder, partially bolted, trad, alpine
         ),
+        VoteDefinition(
+            model_name="SitStartVote",
+            collection_name="sit_start_votes",
+            item_name="sit_start_vote",
+            type=str,
+        ),
+        VoteDefinition(
+            model_name="DefinedStartVote",
+            collection_name="defined_start_votes",
+            item_name="defined_start_vote",
+            type=str,
+        ),
+        VoteDefinition(
+            model_name="EliminationsVote",
+            collection_name="elimination_votes",
+            item_name="eliminations_vote",
+            type=str,  # TODO: draw area of eliminations?
+        ),
+        VoteDefinition(
+            model_name="DescriptionVote",
+            collection_name="description_votes",
+            item_name="description_vote",
+            type=str,
+        ),
         # guide book grade?
         # first ascent grade?
     ]

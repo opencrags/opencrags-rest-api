@@ -11,16 +11,16 @@ router = create_api_router(
     model_name="Sector",
     collection_name="sectors",
     item_name="sector",
-    # statics=dict(
-    #     crag_id=UUID
-    # ),
+    statics=dict(
+        crag_id=UUID
+    ),
     voted=[
-        VoteDefinition(
-            model_name="SectorCragConnectionVote",
-            collection_name="crag_connection_votes",
-            item_name="crag_connection_vote",
-            type=UUID,
-        ),
+        # VoteDefinition(
+        #     model_name="SectorCragConnectionVote",
+        #     collection_name="crag_connection_votes",
+        #     item_name="crag_connection_vote",
+        #     type=UUID,
+        # ),
         VoteDefinition(
             model_name="SectorNameVote",
             collection_name="name_votes",

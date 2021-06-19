@@ -16,5 +16,6 @@ router = create_api_router(
         ascent_date=date,
         flash=bool,
         attempts=Optional[conint(ge=1)],
+        public=bool, # TODO: does this need to be a custom api?
     ),
 )
