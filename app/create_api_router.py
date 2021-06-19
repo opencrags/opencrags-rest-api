@@ -65,6 +65,7 @@ def create_api_router(
         v.model_name: create_model(
             v.model_name,
             value=(v.type, ...),
+            public=(bool, ...),
             __base__=ItemBase,
         )
         for v in voted
@@ -74,6 +75,7 @@ def create_api_router(
         v.model_name: create_model(
             f"{v.model_name}In",
             value=(v.type, ...),
+            public=(bool, ...),
         )
         for v in voted
     }
