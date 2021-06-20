@@ -9,7 +9,7 @@ router = create_api_router(
     item_name="parking",
     statics=dict(
         crag_id=UUID,
-    )
+    ),
     voted=[
         VoteDefinition(
             model_name="ParkingCoordinateVote",

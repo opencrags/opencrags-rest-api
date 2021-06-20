@@ -8,6 +8,11 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+
+    - name: Replace version file
+      run: |
+        echo r${{ github.run_number }} > VERSION
+
     - name: Build and run tests
       env:
         AUTH0_DOMAIN: ${{ secrets.AUTH0_DOMAIN }}

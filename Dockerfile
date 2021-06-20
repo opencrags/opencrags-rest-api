@@ -19,6 +19,7 @@ COPY poetry.lock .
 RUN ~/.poetry/bin/poetry install
 
 COPY app app
+COPY VERSION .
 
 EXPOSE 8000
 

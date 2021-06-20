@@ -7,12 +7,15 @@ import io
 from uuid import UUID
 import base64
 import json
+from pathlib import Path
 import PIL
 from pydantic import BaseModel, validator, Field
 from enum import Enum
 from typing import List, Union, Literal, Optional
 
 from app.routers import (
+    approaches,
+    parkings,
     lines,
     ascents,
     climbs,
@@ -27,7 +30,7 @@ from app.routers import (
 app = FastAPI(
     title="opencrags-rest-api",
     description="Database of boulder problems and lead routes",
-    version="0.0.0",
+    version=Path("VERSION").read_text(),
 )
 
 app.add_middleware(
@@ -51,4 +54,6 @@ app.include_router(climbs.router)
 app.include_router(lines.router)
 app.include_router(ascents.router)
 app.include_router(grades.router)
+app.include_router(approaches.router)
+app.include_router(parkings.router)
 app.include_router(quick_search.router)

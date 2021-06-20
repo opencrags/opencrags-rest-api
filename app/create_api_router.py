@@ -40,8 +40,6 @@ class ItemBase(BaseModel):
     created: datetime  #= Field(default_factory=datetime.utcnow)
 
 
-# TODO: vote base should include "public"
-
 class VoteDefinition(BaseModel):
     model_name: str
     collection_name: str
@@ -61,21 +59,23 @@ def create_api_router(
         dependencies=[Depends(auth.implicit_scheme)],
     )
 
-    vote_models = {
-        v.model_name: create_model(
-            v.model_name,
-            value=(v.type, ...),
-            public=(bool, ...),
-            __base__=ItemBase,
-        )
-        for v in voted
-    }
-
     vote_in_models = {
         v.model_name: create_model(
             f"{v.model_name}In",
             value=(v.type, ...),
             public=(bool, ...),
+            __base__=BaseModel,
+        )
+        for v in voted
+    }
+
+    vote_models = {
+        v.model_name: create_model(
+            v.model_name,
+            id=(UUID, ...),
+            user_id=(str, ...),
+            created=(datetime, ...),
+            __base__=vote_in_models[v.model_name],
         )
         for v in voted
     }
