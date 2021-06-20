@@ -30,7 +30,7 @@ from app.routers import (
 app = FastAPI(
     title="opencrags-rest-api",
     description="Database of boulder problems and lead routes",
-    version=Path("VERSION").read_text(),
+    version=Path("VERSION").read_text().strip(),
 )
 
 app.add_middleware(

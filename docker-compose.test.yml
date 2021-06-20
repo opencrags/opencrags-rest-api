@@ -15,9 +15,7 @@ services:
       DB: "mongodb://opencrags-mongodb:27017"
     env_file:
       - dev.env
-    command: ["/root/.poetry/bin/poetry", "run", "pytest", "tests"]
+    command: ["/root/.poetry/bin/poetry", "run", "pytest", "tests", "-v", "-s"]
 
   opencrags-mongodb:
     image: mongo:4.4.5
-    volumes:
-      - ./tests/data:/data/db

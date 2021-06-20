@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from uuid import UUID
 
 from app import create_api_router, VoteDefinition
 
@@ -24,7 +24,7 @@ router = create_api_router(
             model_name="GradeVote",
             collection_name="grade_votes",
             item_name="grade_vote",
-            type=str,  # TODO system + grade
+            type=UUID,
         ),
         VoteDefinition(
             model_name="ClimbTypeVote",
@@ -46,7 +46,7 @@ router = create_api_router(
         ),
         VoteDefinition(
             model_name="EliminationsVote",
-            collection_name="elimination_votes",
+            collection_name="eliminations_votes",
             item_name="eliminations_vote",
             type=str,  # TODO: draw area of eliminations?
         ),

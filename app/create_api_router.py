@@ -10,7 +10,7 @@ from pydantic import BaseModel, validator, Field
 from enum import Enum
 from typing import List, Dict, Union, Literal, Optional, Any
 from datetime import datetime
-from pydantic import BaseModel, create_model
+from pydantic import BaseModel, create_model, conint
 from starlette.status import HTTP_403_FORBIDDEN, HTTP_409_CONFLICT
 
 from app import mongo
@@ -35,16 +35,16 @@ def rename(name):
 
 
 class ItemBase(BaseModel):
-    id: UUID  #= Field(default_factory=uuid4)
+    id: UUID
     user_id: str
-    created: datetime  #= Field(default_factory=datetime.utcnow)
+    created: datetime
 
 
 class VoteDefinition(BaseModel):
     model_name: str
     collection_name: str
     item_name: str
-    type: Any  # TODO
+    type: Any
 
 
 def create_api_router(
@@ -101,20 +101,35 @@ def create_api_router(
         },
     )
 
-    @router.get(
-        f"/{collection_name}",
+    def censor_item(mongo_item, user):
+        mongo_item = mongo_item.copy()
+        mongo_item.update(**{
+            v.collection_name: [
+                vote
+                if vote["public"] or (user is not None and vote["user_id"] == user.id)
+                else (vote.update(user_id="") or vote)
+                for vote in mongo_item[v.collection_name]
+            ]
+            for v in voted
+        })
+        return mongo_item
+
+    @router.post(
+        f"/{collection_name}/query",
         response_model=List[MainModel],
         status_code=status.HTTP_200_OK,
     )
-    @rename(f"list_{collection_name}")
-    def list_items(
-        user: Auth0User = Security(guest_auth.get_user),
+    @rename(f"query_{collection_name}")
+    def query_collection(
+        query: Dict[str, Any],
+        limit: Optional[conint(ge=1, le=100)] = 20,
+        offset: Optional[conint(ge=0)] = 0,
+        user: Optional[Auth0User] = Security(guest_auth.get_user),
     ):
-        # TODO: filters
-        mongo_items = mongo.db[collection_name].find()
+        mongo_items = mongo.db[collection_name].find(query).skip(offset).limit(limit)
 
         return [
-            MainModel(**mongo_item)
+            MainModel(**censor_item(mongo_item, user))
             for mongo_item in mongo_items
         ]
 
@@ -156,7 +171,7 @@ def create_api_router(
         if mongo_item is None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"No {item_name} with that id")
 
-        return MainModel(**mongo_item)
+        return MainModel(**censor_item(mongo_item, user))
 
     # TODO: always have delete vote too?
 
@@ -180,7 +195,7 @@ def create_api_router(
         @router.post(
             f"/{collection_name}/{{item_id}}/{voted_item.collection_name}",
             response_model=Vote,
-            status_code=status.HTTP_200_OK,
+            status_code=status.HTTP_201_CREATED,
         )
         @rename(f"add_{voted_item.item_name}")
         def add_vote(
@@ -197,7 +212,6 @@ def create_api_router(
                 mongo_vote["user_id"] == user.id
                 for mongo_vote in mongo_item[voted_item.collection_name]
             ]):
-                print("conflict")
                 raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Already voted")
 
             new_vote = Vote(
@@ -259,10 +273,7 @@ def create_api_router(
             vote: VoteIn,
             user: Auth0User = Security(auth.get_user),
         ):
-            remove_response = remove_vote(item_id, vote_id, user)
-            if remove_response.status_code == status.HTTP_200_OK:
-                return add_vote(item_id, vote, user)
-            else:
-                return remove_response
+            remove_vote(item_id, vote_id, user)
+            return add_vote(item_id, vote, user)
 
     return router
