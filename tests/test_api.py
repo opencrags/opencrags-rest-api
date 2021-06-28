@@ -90,5 +90,22 @@ def test_crag(auth):
     assert response.status_code == 201
     sector_id = response.json()["id"]
 
+    response = authorized(
+        client.post,
+        f"/sectors/{sector_id}/name_votes",
+        json=dict(
+            value="Houdini",
+            public=True,
+        ),
+    )
+
+    response = authorized(
+        client.post,
+        f"/sectors/{sector_id}/coordinate_votes",
+        json=dict(
+            value=[17.645371, 59.855488],
+            public=False,
+        ),
+    )
     response = authorized(client.delete, f"/crags/{crag_id}")
     assert response.status_code == 200

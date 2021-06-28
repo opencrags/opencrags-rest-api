@@ -188,8 +188,8 @@ def create_api_router(
     ):
         pass
 
-    for voted_item in voted:
 
+    def create_vote_api(voted_item):
         Vote = vote_models[voted_item.model_name]
         VoteIn = vote_in_models[voted_item.model_name]
 
@@ -242,7 +242,7 @@ def create_api_router(
 
             if mongo_item is None:
                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"No {item_name} with that id")
-   
+
             matched_votes = [
                 mongo_vote
                 for mongo_vote in mongo_item[voted_item.collection_name]
@@ -253,7 +253,7 @@ def create_api_router(
 
             if matched_votes[0]["user_id"] != user.id:
                 raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=f"Vote {voted_item.item_name} has another owner")
-   
+
             mongo_item[voted_item.collection_name] = [
                 mongo_vote
                 for mongo_vote in mongo_item[voted_item.collection_name]
@@ -276,5 +276,8 @@ def create_api_router(
         ):
             remove_vote(item_id, vote_id, user)
             return add_vote(item_id, vote, user)
+
+    for voted_item in voted:
+        create_vote_api(voted_item)
 
     return router
