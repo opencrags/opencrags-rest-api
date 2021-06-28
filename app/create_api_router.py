@@ -73,7 +73,7 @@ def create_api_router(
         v.model_name: create_model(
             v.model_name,
             id=(UUID, ...),
-            user_id=(str, ...),
+            user_id=(Optional[str], None),
             created=(datetime, ...),
             __base__=vote_in_models[v.model_name],
         )
@@ -107,7 +107,7 @@ def create_api_router(
             v.collection_name: [
                 vote
                 if vote["public"] or (user is not None and vote["user_id"] == user.id)
-                else (vote.update(user_id="") or vote)
+                else (vote.update(user_id=None) or vote)
                 for vote in mongo_item[v.collection_name]
             ]
             for v in voted

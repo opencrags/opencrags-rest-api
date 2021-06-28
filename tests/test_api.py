@@ -19,6 +19,16 @@ def auth():
     ).json()
 
 
+def authorized_factory(auth):
+    def authorized(fn, *args, **kwargs):
+        return fn(
+            *args,
+            **kwargs,
+            headers={"authorization": f"Bearer {auth['access_token']}"}
+        )
+    return authorized
+
+
 def drop_database():
     client = MongoClient(os.environ["DB"])
     client.drop_database("opencrags")
@@ -35,7 +45,7 @@ def test_guest_query():
 
     for crag in response.json():
         for vote in crag["name_votes"]:
-            assert vote["public"] or vote["user_id"] == ""
+            assert vote["public"] or vote["user_id"] == None
     
     return response
 
@@ -43,43 +53,38 @@ def test_guest_query():
 def test_crag(auth):
     drop_database()
 
-    response = client.post(
-        "/crags",
-        json=dict(),
-        headers={"authorization": f"Bearer {auth['access_token']}"},
-    )
+    authorized = authorized_factory(auth)
+
+    response = authorized(client.post, "/crags", json=dict())
     assert response.status_code == 201
     crag_id = response.json()["id"]
 
     assert len(test_guest_query().json()) == 1
 
-    response = client.post(
+    response = authorized(
+        client.post,
         f"/crags/{crag_id}/name_votes",
         json=dict(
             value="Fagerdala",
             public=False,
         ),
-        headers={"authorization": f"Bearer {auth['access_token']}"},
     )
     assert response.status_code == 201
     vote_id = response.json()["id"]
 
     assert test_guest_query().json()[0]["name_votes"][0]["value"] == "Fagerdala"
 
-    response = client.put(
+    response = authorized(
+        client.put,
         f"/crags/{crag_id}/name_votes/{vote_id}",
         json=dict(
             value="Houdini",
             public=True,
         ),
-        headers={"authorization": f"Bearer {auth['access_token']}"},
     )
     assert response.status_code == 200
 
     assert test_guest_query().json()[0]["name_votes"][0]["value"] == "Houdini"
 
-    response = client.delete(
-        f"/crags/{crag_id}",
-        headers={"authorization": f"Bearer {auth['access_token']}"},
-    )
+    response = authorized(client.delete, f"/crags/{crag_id}")
     assert response.status_code == 200
