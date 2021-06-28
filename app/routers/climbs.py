@@ -58,5 +58,7 @@ router = create_api_router(
         ),
         # guide book grade?
         # first ascent grade?
+        # point to other page with information?
+        # point to video + timestamp with beta
     ]
 )

@@ -19,7 +19,7 @@ router = APIRouter(
 
 
 @router.get(
-    "/quickSearch",
+    "/quick-search",
     # response_model=List[Union[Crag, IdentifiedClimb]],
     status_code=status.HTTP_200_OK,
 )

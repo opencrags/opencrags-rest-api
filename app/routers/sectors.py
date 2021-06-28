@@ -1,6 +1,6 @@
 from uuid import UUID
 from fastapi import APIRouter
-from typing import List
+from typing import List, Tuple
 
 from app import create_api_router, VoteDefinition
 
@@ -37,7 +37,7 @@ router = create_api_router(
             model_name="CoordinateVote",
             collection_name="coordinate_votes",
             item_name="coordinate_vote",
-            type=str,
+            type=Tuple[float, float],
         ),
     ],
 )

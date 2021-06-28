@@ -148,6 +148,7 @@ def create_api_router(
             id=uuid4(),
             user_id=user.id,
             created=datetime.utcnow(),
+            **model_in.dict(),
             **{v.collection_name: list() for v in voted},
         )
         mongo.db[collection_name].insert_one(item.dict())

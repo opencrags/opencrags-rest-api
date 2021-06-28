@@ -44,7 +44,7 @@ class GradeSystemGrade(BaseModel):
 
 
 @router.get(
-    f"/grade-system-grades",
+    "/grade-system-grades",
     response_model=List[GradeSystemGrade],
     status_code=status.HTTP_200_OK,
     dependencies=[Depends(auth.implicit_scheme)],

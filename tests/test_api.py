@@ -86,5 +86,9 @@ def test_crag(auth):
 
     assert test_guest_query().json()[0]["name_votes"][0]["value"] == "Houdini"
 
+    response = authorized(client.post, f"/sectors", json=dict(crag_id=crag_id))
+    assert response.status_code == 201
+    sector_id = response.json()["id"]
+
     response = authorized(client.delete, f"/crags/{crag_id}")
     assert response.status_code == 200
