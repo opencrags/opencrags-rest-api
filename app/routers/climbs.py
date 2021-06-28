@@ -7,6 +7,9 @@ router = create_api_router(
     model_name="Climbs",
     collection_name="climbs",
     item_name="climb",
+    statics=dict(
+        sector_id=UUID
+    ),
     voted=[
         VoteDefinition(
             model_name="ClimbNameVote",
