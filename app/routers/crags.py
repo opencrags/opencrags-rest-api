@@ -16,7 +16,7 @@ from typing import Any
 
 from app import create_api_router, VoteDefinition
 
-
+# TODO: unique slug for crags, sectors, and climbs
 # TODO: area vote?
 
 router = create_api_router(

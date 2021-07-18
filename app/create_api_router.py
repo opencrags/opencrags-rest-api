@@ -8,10 +8,9 @@ import json
 import PIL
 from pydantic import BaseModel, validator, Field
 from enum import Enum
-from typing import List, Dict, Union, Literal, Optional, Any
+from typing import List, Dict, Union, Literal, Optional, Any, get_type_hints
 from datetime import datetime
 from pydantic import BaseModel, create_model, conint
-from starlette.status import HTTP_403_FORBIDDEN, HTTP_409_CONFLICT
 
 from app import mongo
 
@@ -126,6 +125,12 @@ def create_api_router(
         offset: Optional[conint(ge=0)] = 0,
         user: Optional[Auth0User] = Security(guest_auth.get_user),
     ):
+        type_hints = get_type_hints(MainModel)
+        query = {
+            key: type_hints.get(key, str)(value)
+            for key, value in query.items()
+        }
+
         mongo_items = mongo.db[collection_name].find(query).skip(offset).limit(limit)
 
         return [
