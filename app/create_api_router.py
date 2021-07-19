@@ -227,14 +227,12 @@ def create_api_router(
                 **vote.dict(),
             )
 
-            mongo_item[voted_item.collection_name].append(new_vote.dict())
-
-            mongo.db[collection_name].replace_one(dict(id=item_id), mongo_item)
+            mongo.db[collection_name].update_one(dict(id=item_id), {"$push": {voted_item.collection_name: new_vote.dict()}})
             return new_vote
 
         @router.delete(
             f"/{collection_name}/{{item_id}}/{voted_item.collection_name}/{{vote_id}}",
-            response_model=Vote,
+            response_model=dict,
             status_code=status.HTTP_200_OK,
         )
         @rename(f"remove_{voted_item.item_name}")
@@ -259,13 +257,12 @@ def create_api_router(
             if matched_votes[0]["user_id"] != user.id:
                 raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=f"Vote {voted_item.item_name} has another owner")
 
-            mongo_item[voted_item.collection_name] = [
-                mongo_vote
-                for mongo_vote in mongo_item[voted_item.collection_name]
-                if mongo_vote["id"] != vote_id
-            ]
+            update_result = mongo.db[collection_name].update_one(dict(id=item_id), {"$pull": {voted_item.collection_name: {"id": vote_id}}})
 
-            mongo.db[collection_name].replace_one(dict(id=item_id), mongo_item)
+            if update_result.modified_count == 0:
+                raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Failed to remove vote")
+
+            return {}
 
         @router.put(
             f"/{collection_name}/{{item_id}}/{voted_item.collection_name}/{{vote_id}}",
