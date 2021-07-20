@@ -47,6 +47,11 @@ def redirect_to_docs():
     return RedirectResponse(url="/docs")
 
 
+@app.get("/version", status_code=status.HTTP_200_OK, response_model=str, include_in_schema=True)
+def get_api_version():
+    return Path("VERSION").read_text()
+
+
 app.include_router(crags.router)
 app.include_router(sectors.router)
 app.include_router(images.router)

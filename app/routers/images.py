@@ -4,6 +4,10 @@ from fastapi import APIRouter
 from app import create_api_router, VoteDefinition
 
 
+# TODO: downsize image height
+# TODO: maxsize limit
+# TODO: only allow jpeg
+
 router = create_api_router(
     model_name="Image",
     collection_name="images",
