@@ -8,7 +8,8 @@ router = create_api_router(
     collection_name="climbs",
     item_name="climb",
     statics=dict(
-        sector_id=UUID
+        crag_id=UUID,
+        sector_id=UUID,
     ),
     voted=[
         VoteDefinition(

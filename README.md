@@ -14,7 +14,7 @@ docker-compose up
 ### Testing
 
 ```bash
-docker-compose -f docker-compose.test.yml up --build --exit-code-from opencrags-rest-api
+docker-compose -f test.docker-compose.yml up --build --exit-code-from opencrags-rest-api
 ```
 
 ### Install
