@@ -1,6 +1,13 @@
 from uuid import UUID
+from pydantic import BaseModel
+from typing import List, Tuple, Literal
 
 from app import create_api_router, VoteDefinition
+
+
+class GeoLine(BaseModel):
+    type: Literal["LineString"]
+    coordinates: List[Tuple[float, float]]
 
 
 router = create_api_router(
@@ -15,7 +22,7 @@ router = create_api_router(
             model_name="ApproachPathVote",
             collection_name="path_votes",
             item_name="path_vote",
-            type=str,
+            type=GeoLine,
         ),
     ]
 )

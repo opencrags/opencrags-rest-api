@@ -2,7 +2,7 @@ from uuid import UUID
 from fastapi import APIRouter
 from typing import List, Tuple
 
-from app import create_api_router, VoteDefinition
+from app import GeoPoint, create_api_router, VoteDefinition
 
 
 # TODO: area vote?
@@ -15,12 +15,6 @@ router = create_api_router(
         crag_id=UUID
     ),
     voted=[
-        # VoteDefinition(
-        #     model_name="SectorCragConnectionVote",
-        #     collection_name="crag_connection_votes",
-        #     item_name="crag_connection_vote",
-        #     type=UUID,
-        # ),
         VoteDefinition(
             model_name="SectorNameVote",
             collection_name="name_votes",
@@ -37,7 +31,7 @@ router = create_api_router(
             model_name="CoordinateVote",
             collection_name="coordinate_votes",
             item_name="coordinate_vote",
-            type=Tuple[float, float],
+            type=GeoPoint,
         ),
     ],
 )

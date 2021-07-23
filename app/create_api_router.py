@@ -1,14 +1,11 @@
+from enum import unique
 import os
-from fastapi import APIRouter, Response, status, HTTPException, Query, Depends, Security
+from fastapi import APIRouter, status, HTTPException, Depends, Security
 from fastapi_auth0 import Auth0, Auth0User
 from uuid import UUID, uuid4
-import io
-import base64
-import json
-import PIL
-from pydantic import BaseModel, validator, Field
-from enum import Enum
-from typing import List, Dict, Union, Literal, Optional, Any, get_type_hints
+import pymongo
+from pydantic import BaseModel
+from typing import List, Dict, Optional, Any, get_type_hints
 from datetime import datetime
 from pydantic import BaseModel, create_model, conint
 
@@ -149,6 +146,8 @@ def create_api_router(
         model_in: MainModelIn,
         user: Auth0User = Security(auth.get_user),
     ):
+        mongo.db[collection_name].create_index("id", unique=True)
+
         item = MainModel(
             id=uuid4(),
             user_id=user.id,
@@ -191,7 +190,22 @@ def create_api_router(
         item_id: UUID,
         user: Auth0User = Security(auth.get_user),
     ):
-        pass
+        mongo_item = mongo.db[collection_name].find_one(dict(id=item_id))
+
+        if mongo_item is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"No {item_name} with that id")
+
+        if mongo_item["user_id"] != user.id:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=f"Item {item_name} has another owner")
+
+        # TODO: should not allow deletion if there is related content owned by other users?
+
+        mongo_item = mongo.db[collection_name].find_one_and_delete(dict(id=item_id))
+
+        if mongo_item is None:
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Failed to remove {item_name}")
+
+        return MainModel(**censor_item(mongo_item, user))
 
 
     def create_vote_api(voted_item):

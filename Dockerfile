@@ -23,4 +23,5 @@ COPY VERSION .
 
 EXPOSE 8000
 
-CMD ["/root/.poetry/bin/poetry", "run", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# CMD ["/root/.poetry/bin/poetry", "run", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["/root/.poetry/bin/poetry", "run", "python", "-m", "app.main", "--host", "0.0.0.0", "--port", "8000"]

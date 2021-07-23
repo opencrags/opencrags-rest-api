@@ -1,17 +1,10 @@
-from fastapi import FastAPI, Response, status, HTTPException, Query
+import argparse
+from fastapi import FastAPI, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.testclient import TestClient
 from starlette.responses import RedirectResponse
-import random
-import io
-from uuid import UUID
-import base64
-import json
 from pathlib import Path
-import PIL
-from pydantic import BaseModel, validator, Field
-from enum import Enum
-from typing import List, Union, Literal, Optional
+import uvicorn
 
 from app.routers import (
     approaches,
@@ -33,8 +26,10 @@ app = FastAPI(
     version=Path("VERSION").read_text().strip(),
 )
 
-app.add_middleware(
-    CORSMiddleware,
+# CORS errors instead of seeing internal exceptions
+# https://stackoverflow.com/questions/63606055/why-do-i-get-cors-error-reason-cors-request-did-not-succeed
+cors = CORSMiddleware(
+    app=app,
     allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
@@ -62,3 +57,15 @@ app.include_router(grades.router)
 app.include_router(approaches.router)
 app.include_router(parkings.router)
 app.include_router(quick_search.router)
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--host", type=str, default="0.0.0.0")
+    parser.add_argument("--port", type=int, default=8000)
+    parser.add_argument("--reload", action="store_true")
+
+    args = parser.parse_args()
+
+    # uvicorn.run(cors, host=args.host, port=args.port, reload=args.reload)
+    uvicorn.run("app.main:cors", host=args.host, port=args.port, reload=args.reload)
