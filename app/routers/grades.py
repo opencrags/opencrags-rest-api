@@ -41,6 +41,7 @@ class GradeSystemGrade(BaseModel):
     id: UUID
     system: str
     grade: str
+    rank: int
 
 
 @router.get(
@@ -54,11 +55,15 @@ def list_grade_systems_with_grades(
     grade: Optional[str] = None,
     user: Optional[Auth0User] = Security(guest_auth.get_user)
 ):
-    mongo_items = mongo.db.grade_system_grades.find(dict(
-        system=system,
-        grade=grade,
-    ))
-    return mongo_items
+    filters = dict()
+    if system:
+        filters["grade"] = system
+    if grade:
+        filters["grade"] = grade
+    return [
+        GradeSystemGrade(**mongo_grade_system_grade)
+        for mongo_grade_system_grade in mongo.db.grade_system_grades.find(filters)
+    ]
 
 
 @router.get(
@@ -77,3 +82,77 @@ def view_grade_system_grade(
         return Response(status_code=status.HTTP_404_NOT_FOUND)
     else:
         return mongo_item
+
+
+def add_grades():
+    system_grades = {
+        "Fontainebleau": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "4+",
+            "5",
+            "5+",
+            "6A+",
+            "6B",
+            "6B+",
+            "6C",
+            "6C+",
+            "7A	",
+            "7A+",
+            "7B",
+            "7B+",
+            "7C",
+            "7C+",
+            "8A",
+            "8A+",
+            "8B",
+            "8B+",
+            "8C",
+            "8C+",
+            "9A",
+            "9A+",
+            "9B",
+            "9B+",
+            "9C",
+            "9C+",
+        ],
+        "Hueco": [
+            "VB",
+            "V0",
+            "V0+",
+            "V1",
+            "V2",
+            "V3",
+            "V4",
+            "V5",
+            "V6",
+            "V7",
+            "V8",
+            "V9",
+            "V10",
+            "V11",
+            "V12",
+            "V13",
+            "V14",
+            "V15",
+            "V16",
+            "V17",
+            "V18",
+            "V19",
+            "V20",
+        ],
+    }
+
+    for system, grades in system_grades.items():
+        for index, grade in enumerate(grades):
+            mongo.db.grade_system_grades.insert_one(GradeSystemGrade(
+                id=uuid4(),
+                system=system,
+                grade=grade,
+                rank=index,
+            ).dict())
+
+if mongo.db.grade_system_grades.count() == 0:
+    add_grades()
