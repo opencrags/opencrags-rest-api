@@ -42,8 +42,8 @@ def search_crags_sectors_and_climbs_by_name(
     limit: int = 16,
     offset: int = 0,
 ):  
-    pattern = re.compile(f"{text}", re.IGNORECASE)
-    mongo_crags = list(mongo.db.crags.find({"name_votes.value": { "$regex": pattern}}).skip(offset).limit(limit))
+    pattern = re.compile(f".*{text}.*", re.IGNORECASE)
+    mongo_crags = list(mongo.db.crags.find({"name_votes.value": {"$regex": pattern}}).skip(offset).limit(limit))
 
     results = [
         QuickSearchResultItem(
@@ -61,7 +61,8 @@ def search_crags_sectors_and_climbs_by_name(
     offset = max(0, offset - len(mongo_crags))
     limit -= len(mongo_crags)
     if limit >= 1:
-        mongo_sectors = list(mongo.db.sectors.find({"name_votes.value": { "$regex": pattern}}).skip(offset).limit(limit))
+        mongo_sectors = list(mongo.db.sectors.find({"name_votes.value": {"$regex": pattern}}).skip(offset).limit(limit))
+
         results += [
             QuickSearchResultItem(
                 type=QuickSearchResultItemType.sector,
@@ -78,7 +79,7 @@ def search_crags_sectors_and_climbs_by_name(
         limit -= len(mongo_sectors)
 
     if limit >= 1:
-        mongo_climbs = list(mongo.db.climbs.find({"name_votes.value": { "$regex": pattern}}).skip(offset).limit(limit))
+        mongo_climbs = list(mongo.db.climbs.find({"name_votes.value": {"$regex": pattern}}).skip(offset).limit(limit))
         results += [
             QuickSearchResultItem(
                 type=QuickSearchResultItemType.climb,

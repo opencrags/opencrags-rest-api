@@ -55,7 +55,7 @@ def test_crag(auth):
 
     authorized = authorized_factory(auth)
 
-    response = authorized(client.post, "/crags", json=dict(grade_system="Hueco scale"))
+    response = authorized(client.post, "/crags", json=dict())
     assert response.status_code == 201
     crag_id = response.json()["id"]
 
@@ -86,25 +86,28 @@ def test_crag(auth):
 
     assert test_guest_query().json()[0]["name_votes"][0]["value"] == "Houdini"
 
-    response = authorized(client.post, f"/sectors", json=dict(crag_id=crag_id))
+    response = authorized(client.post, "/sectors", json=dict(crag_id=crag_id))
     assert response.status_code == 201
     sector_id = response.json()["id"]
+
+    assert len(test_guest_query().json()) == 1
 
     response = authorized(
         client.post,
         f"/sectors/{sector_id}/name_votes",
         json=dict(
-            value="Houdini",
+            value="Gräddhyllan",
             public=True,
         ),
     )
+    assert response.status_code == 201
 
     response = authorized(
         client.get,
-        f"/quick-search?text=Houd",
+        f"/quick-search?text=grädd",
     )
     assert response.status_code == 200
-    assert response.json()[0]["name"] == "Houdini"
+    assert response.json()[0]["name"] == "Gräddhyllan"
 
     response = authorized(
         client.post,
