@@ -100,6 +100,13 @@ def test_crag(auth):
     )
 
     response = authorized(
+        client.get,
+        f"/quick-search?text=Houd",
+    )
+    assert response.status_code == 200
+    assert response.json()[0]["name"] == "Houdini"
+
+    response = authorized(
         client.post,
         f"/sectors/{sector_id}/coordinate_votes",
         json=dict(

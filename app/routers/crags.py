@@ -8,7 +8,7 @@ class GradeSystem(str, Enum):
     FONT = "Fontainebleau grading system"
     HUECO = "Hueco scale"
     FRENCH = "French numerical system"
-    YDS = "Yosemite decimal system"
+    YDS = "Yosemite decimal system" 
 
 
 router = create_api_router(

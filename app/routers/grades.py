@@ -222,5 +222,5 @@ def add_grades():
                 rank=index,
             ).dict())
 
-if mongo.db.grade_system_grades.count() == 0:
+if mongo.db.grade_system_grades.count_documents({}) == 0:
     add_grades()
