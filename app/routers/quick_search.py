@@ -28,3 +28,7 @@ def search_crags_sectors_and_climbs_by_name(
     limit: int = 16,
 ):
     pass
+    # expand all votes?
+    # aggregate?
+    # pick most common
+    

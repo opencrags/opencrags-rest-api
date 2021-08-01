@@ -55,7 +55,7 @@ def test_crag(auth):
 
     authorized = authorized_factory(auth)
 
-    response = authorized(client.post, "/crags", json=dict())
+    response = authorized(client.post, "/crags", json=dict(grade_system="Hueco scale"))
     assert response.status_code == 201
     crag_id = response.json()["id"]
 

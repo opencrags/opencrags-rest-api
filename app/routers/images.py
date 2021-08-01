@@ -1,7 +1,6 @@
 from uuid import UUID
-from fastapi import APIRouter
 
-from app import create_api_router, VoteDefinition
+from app import create_api_router
 
 
 # TODO: downsize image height
