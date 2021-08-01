@@ -1,6 +1,5 @@
 from uuid import UUID
-from fastapi import APIRouter
-from typing import List, Tuple
+from typing import List
 
 from app import GeoPoint, create_api_router, VoteDefinition
 
@@ -32,6 +31,12 @@ router = create_api_router(
             collection_name="coordinate_votes",
             item_name="coordinate_vote",
             type=GeoPoint,
+        ),
+        VoteDefinition(
+            model_name="SectorBannerVote",
+            collection_name="banner_votes",
+            item_name="banner_vote",
+            type=UUID,
         ),
     ],
 )
