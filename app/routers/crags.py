@@ -4,20 +4,10 @@ from enum import Enum
 from app import create_api_router, VoteDefinition
 
 
-class GradeSystem(str, Enum):
-    FONT = "Fontainebleau grading system"
-    HUECO = "Hueco scale"
-    FRENCH = "French numerical system"
-    YDS = "Yosemite decimal system" 
-
-
 router = create_api_router(
     model_name="Crag",
     collection_name="crags",
     item_name="crag",
-    statics=dict(
-        grade_system=GradeSystem,
-    ),
     voted=[
         VoteDefinition(
             model_name="CragNameVote",
