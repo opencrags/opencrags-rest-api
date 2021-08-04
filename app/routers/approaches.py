@@ -10,7 +10,7 @@ class GeoLine(BaseModel):
     coordinates: List[Tuple[float, float]]
 
 
-router = create_api_router(
+router, MainModel, vote_models = create_api_router(
     model_name="Approach",
     collection_name="approaches",
     item_name="approach",

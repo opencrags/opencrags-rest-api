@@ -7,7 +7,7 @@ from app import create_api_router
 # TODO: maxsize limit
 # TODO: only allow jpeg
 
-router = create_api_router(
+router, MainModel, vote_models = create_api_router(
     model_name="Banner",
     collection_name="banners",
     item_name="banner",

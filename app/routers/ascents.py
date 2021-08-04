@@ -2,12 +2,11 @@ from typing import Optional
 from uuid import UUID
 from datetime import date
 from pydantic import conint
-from fastapi import APIRouter
 
-from app import create_api_router, VoteDefinition
+from app import create_api_router
 
 
-router = create_api_router(
+router, MainModel, vote_models = create_api_router(
     model_name="Ascent",
     collection_name="ascents",
     item_name="ascent",

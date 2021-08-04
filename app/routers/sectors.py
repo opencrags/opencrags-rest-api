@@ -6,7 +6,7 @@ from app import GeoPoint, create_api_router, VoteDefinition
 
 # TODO: area vote?
 
-router = create_api_router(
+router, MainModel, vote_models = create_api_router(
     model_name="Sector",
     collection_name="sectors",
     item_name="sector",

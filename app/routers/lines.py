@@ -14,7 +14,7 @@ class LineNode(BaseModel):
     y: float
 
 
-router = create_api_router(
+router, MainModel, vote_models = create_api_router(
     model_name="Line",
     collection_name="lines",
     item_name="line",

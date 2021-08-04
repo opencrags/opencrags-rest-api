@@ -12,6 +12,7 @@ from app.routers import (
     lines,
     ascents,
     climbs,
+    search_climbs,
     crags,
     images,
     quick_search,
@@ -57,6 +58,7 @@ app.include_router(grades.router)
 app.include_router(approaches.router)
 app.include_router(parkings.router)
 app.include_router(quick_search.router)
+app.include_router(search_climbs.router)
 
 
 if __name__ == "__main__":

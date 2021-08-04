@@ -3,7 +3,7 @@ from uuid import UUID
 from app import GeoPoint, create_api_router, VoteDefinition
 
 
-router = create_api_router(
+router, MainModel, vote_models = create_api_router(
     model_name="Parking",
     collection_name="parkings",
     item_name="parking",

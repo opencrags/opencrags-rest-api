@@ -296,4 +296,4 @@ def create_api_router(
     for voted_item in voted:
         create_vote_api(voted_item)
 
-    return router
+    return router, MainModel, vote_models

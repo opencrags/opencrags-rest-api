@@ -3,7 +3,7 @@ from uuid import UUID
 from app import create_api_router, VoteDefinition
 
 
-router = create_api_router(
+router, MainModel, vote_models = create_api_router(
     model_name="Climbs",
     collection_name="climbs",
     item_name="climb",
