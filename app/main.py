@@ -23,7 +23,11 @@ from app.routers import (
 
 app = FastAPI(
     title="opencrags-rest-api",
-    description="Database of boulder problems and lead routes",
+    description=" ".join([
+        "Open database of boulder problems and lead routes. See",
+        "<a href='https://github.com/opencrags/opencrags-rest-api'>github</a>",
+        "for more information.",
+    ]),
     version=Path("VERSION").read_text().strip(),
 )
 

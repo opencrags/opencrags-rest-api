@@ -10,19 +10,16 @@ import json
 import PIL
 from pydantic import BaseModel, validator, Field
 from enum import Enum
-from typing import List, Union, Literal, Optional, Any
+from typing import List, Tuple, Union, Literal, Optional, Any
 import pymongo
 
 from app import mongo, GeoPoint
-from app.routers import sectors, climbs
 
 
 router = APIRouter(
     tags=["utilities"],
 )
 
-# distance from point
-# within area
 # mean stars
 # number of people who voted for stars?
 # most voted grade
@@ -40,41 +37,57 @@ class SearchClimbsItem(BaseModel):
 
 @router.get(
     "/search-climbs",
-    response_model=List[Any],
+    response_model=List[SearchClimbsItem],
     status_code=status.HTTP_200_OK,
 )
 def search_climbs(
     longitude: float,
     latitude: float,
     max_distance: float,  # km
+    within_polygon: Optional[str] = None,
     # sort_by: str
     limit: int = 16,
     offset: int = 0,
 ):
     mongo.db.sectors.create_index([("coordinate_votes.value", pymongo.GEOSPHERE)])
 
-    mongo_climb_search = list(
-        mongo.db.sectors.aggregate([
-            {"$geoNear": {
-                "includeLocs": "coordinate_votes.value",
-                "distanceField": "distance",
-                "near": {"type": "Point", "coordinates": [longitude, latitude]},
-                "maxDistance": max_distance * 1000,
-                "distanceMultiplier": 0.001,
-                "spherical": True,
-                # query: can use query here
-            }},
-            {"$lookup": {
-                "from": "climbs",
-                "localField": "id",
-                "foreignField": "sector_id",
-                "as": "climb",
-            }},
-            {"$unwind": "$climb"},
-            {"$skip": offset},
-            {"$limit": limit},
-        ])
-    )
+    pipeline = [
+        {"$geoNear": {
+            "includeLocs": "coordinate_votes.value",
+            "distanceField": "distance",
+            "near": {"type": "Point", "coordinates": [longitude, latitude]},
+            "maxDistance": max_distance * 1000,
+            "distanceMultiplier": 0.001,
+            "spherical": True,
+            # query: can use query here
+        }},
+    ]
+
+    if within_polygon is not None:
+        pipeline.append({"$match": {
+            "coordinate_votes.value": {
+                "$geoWithin": {
+                    "$geometry": {
+                        "type": "Polygon",
+                        "coordinates": [json.loads(within_polygon)],
+                    }
+                }
+            }
+        }})
+    
+    pipeline += [
+        {"$lookup": {
+            "from": "climbs",
+            "localField": "id",
+            "foreignField": "sector_id",
+            "as": "climb",
+        }},
+        {"$unwind": "$climb"},
+        {"$skip": offset},
+        {"$limit": limit},
+    ]
+
+    mongo_climb_search = list(mongo.db.sectors.aggregate(pipeline))
 
     return [
         SearchClimbsItem(
@@ -83,9 +96,7 @@ def search_climbs(
             distance=mongo_climb_search_item["distance"],
             name=mongo_climb_search_item["climb"]["name_votes"][0]["value"],
             coordinates=mongo_climb_search_item["coordinate_votes"]["value"],
-        )
+        ).dict()
         for mongo_climb_search_item in mongo_climb_search
-        if (
-            len(mongo_climb_search_item["climb"]["name_votes"]) >= 1
-        )
+        if len(mongo_climb_search_item["climb"]["name_votes"]) >= 1
     ]
