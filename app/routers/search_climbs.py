@@ -43,7 +43,7 @@ class SearchClimbsItem(BaseModel):
 def search_climbs(
     longitude: float,
     latitude: float,
-    max_distance: float,  # km
+    max_distance: Optional[float] = None,  # km
     within_polygon: Optional[str] = None,
     # sort_by: str
     limit: int = 16,
@@ -56,12 +56,14 @@ def search_climbs(
             "includeLocs": "coordinate_votes.value",
             "distanceField": "distance",
             "near": {"type": "Point", "coordinates": [longitude, latitude]},
-            "maxDistance": max_distance * 1000,
             "distanceMultiplier": 0.001,
             "spherical": True,
             # query: can use query here
         }},
     ]
+
+    if max_distance is not None:
+        pipeline[0]["$geoNear"]["maxDistance"] = max_distance * 1000
 
     if within_polygon is not None:
         pipeline.append({"$match": {
