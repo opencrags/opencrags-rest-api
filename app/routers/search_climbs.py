@@ -1,7 +1,8 @@
-from fastapi import APIRouter, Response, status, HTTPException, Query
+from fastapi import APIRouter, Response, status, HTTPException, Query, Security
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.testclient import TestClient
 from starlette.responses import RedirectResponse
+from fastapi_auth0 import Auth0, Auth0User
 import re
 import io
 from uuid import UUID
@@ -10,11 +11,30 @@ import json
 import PIL
 from pydantic import BaseModel, validator, Field
 from enum import Enum
-from typing import List, Tuple, Union, Literal, Optional, Any
+from typing import List, Dict, Union, Literal, Optional, Any
 import pymongo
 
 from app import mongo, GeoPoint
+import os
 
+from fastapi import APIRouter, Response, status
+from uuid import UUID, uuid4
+from pydantic import BaseModel
+from typing import List, Optional
+from pydantic import BaseModel
+
+from app import mongo, routers
+
+auth = Auth0(
+    domain=os.environ["AUTH0_DOMAIN"],
+    api_audience=os.environ["AUTH0_API_AUDIENCE"],
+)
+
+guest_auth = Auth0(
+    domain=os.environ["AUTH0_DOMAIN"],
+    api_audience=os.environ["AUTH0_API_AUDIENCE"],
+    auto_error=False,
+)
 
 router = APIRouter(
     tags=["utilities"],
@@ -27,11 +47,24 @@ router = APIRouter(
 # number of ascents
 # climb type
 
+
+def censor_votes(mongo_votes, user):
+    mongo_votes = mongo_votes.copy()
+    return [
+        vote
+        if vote["public"] or (user is not None and vote["user_id"] == user.id)
+        else (vote.update(user_id=None) or vote)
+        for vote in mongo_votes
+    ]
+
+
 class SearchClimbsItem(BaseModel):
     sector_id: UUID
     climb_id: UUID
     distance: float
-    name: str
+    name_votes: List[routers.climbs.vote_models["ClimbNameVote"]]
+    grade_votes: List[routers.climbs.vote_models["GradeVote"]]
+    rating_votes: List[routers.climbs.vote_models["RatingVote"]]
     coordinates: GeoPoint
 
 
@@ -48,6 +81,7 @@ def search_climbs(
     # sort_by: str
     limit: int = 16,
     offset: int = 0,
+    user: Optional[Auth0User] = Security(guest_auth.get_user),
 ):
     mongo.db.sectors.create_index([("coordinate_votes.value", pymongo.GEOSPHERE)])
 
@@ -96,7 +130,9 @@ def search_climbs(
             sector_id=mongo_climb_search_item["id"],
             climb_id=mongo_climb_search_item["climb"]["id"],
             distance=mongo_climb_search_item["distance"],
-            name=mongo_climb_search_item["climb"]["name_votes"][0]["value"],
+            name_votes=censor_votes(mongo_climb_search_item["climb"]["name_votes"], user),
+            grade_votes=censor_votes(mongo_climb_search_item["climb"]["grade_votes"], user),
+            rating_votes=censor_votes(mongo_climb_search_item["climb"]["rating_votes"], user),
             coordinates=mongo_climb_search_item["coordinate_votes"]["value"],
         ).dict()
         for mongo_climb_search_item in mongo_climb_search
