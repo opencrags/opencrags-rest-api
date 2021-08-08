@@ -1,4 +1,4 @@
-from collections import defaultdict
+from enum import Enum
 from uuid import UUID
 
 from app import create_api_router, VoteDefinition, VoteAggregation
@@ -16,6 +16,17 @@ def most_voted(mongo_votes):
 
 def average(mongo_votes):
     return sum([mongo_vote["value"] for mongo_vote in mongo_votes]) / len(mongo_votes)
+
+
+class ClimbType(str, Enum):
+    boulder = "boulder"
+    sport = "sport"
+    deep_water_solo = "deep_water_solo"
+    traditional = "traditional"
+    partially_bolted = "partially_bolted"
+    ice_or_mixed = "ice_or_mixed"
+    aid = "aid"
+    mountain = "mountain"
 
 
 router, MainModel, vote_models = create_api_router(
@@ -58,7 +69,7 @@ router, MainModel, vote_models = create_api_router(
             model_name="ClimbTypeVote",
             collection_name="climb_type_votes",
             item_name="climb_type_vote",
-            type=str,  # TODO enum: sport, boulder, partially bolted, trad, alpine
+            type=ClimbType,
         ),
         VoteDefinition(
             model_name="SitStartVote",

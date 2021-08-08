@@ -11,7 +11,6 @@ import base64
 import json
 import PIL
 from pydantic import BaseModel, validator, Field
-from enum import Enum
 from typing import List, Dict, Union, Literal, Optional, Any
 from datetime import datetime
 from pydantic import BaseModel, create_model

@@ -1,5 +1,4 @@
 from uuid import UUID
-from enum import Enum
 
 from app import create_api_router, VoteDefinition
 

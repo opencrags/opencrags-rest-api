@@ -224,7 +224,6 @@ def create_api_router(
         def update_aggregation(item_id):
             mongo_item = mongo.db[collection_name].find_one(dict(id=item_id))
             aggregated_value = voted_item.aggregation.fn(mongo_item[voted_item.collection_name])
-            print("aggregated_value", aggregated_value, flush=True)
             mongo.db[collection_name].update_one(dict(id=item_id), {"$set": {voted_item.aggregation.name: aggregated_value}})
 
         @router.post(

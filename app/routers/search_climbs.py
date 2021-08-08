@@ -62,6 +62,11 @@ class SearchClimbsItem(BaseModel):
     coordinates: GeoPoint
 
 
+class SearchClimbsSort(str, Enum):
+    distance = "distance"
+    rating = "rating"
+
+
 @router.post(
     "/search-climbs",
     response_model=List[SearchClimbsItem],
@@ -73,12 +78,12 @@ def search_climbs(
     max_distance: Optional[float] = None,  # km
     within_polygon: List[Tuple[float, float]] = None,
     grade_ids: Optional[List[UUID]] = None,
+    minimum_grade_votes: Optional[int] = None,
     minimum_average_rating: Optional[float] = None,
-    # minimum_grade_votes
-    # minimum_rating_votes
+    minimum_rating_votes: Optional[int] = None,
     # minimum_ascents
-    # climb_type,
-    # sort_by: str
+    climb_types: Optional[List[routers.climbs.ClimbType]] = None,
+    sort_by: Optional[SearchClimbsSort] = SearchClimbsSort.distance,
     limit: int = 16,
     offset: int = 0,
     user: Optional[Auth0User] = Security(guest_auth.get_user),
@@ -129,10 +134,32 @@ def search_climbs(
             {"$match": {"climb.most_voted_grade": {"$in": grade_ids}}}
         ]
 
+    if minimum_grade_votes is not None:
+        pipeline += [{"$match": {"$expr": {"$gte": [
+            {"$size": "$climb.grade_votes"},
+            minimum_grade_votes,
+        ]}}}]
+
     if minimum_average_rating is not None:
         pipeline += [
             {"$match": {"climb.average_rating": {"$gte": minimum_average_rating}}}
         ]
+
+    if minimum_rating_votes is not None:
+        pipeline += [{"$match": {"$expr": {"$gte": [
+            {"$size": "$climb.rating_votes"},
+            minimum_rating_votes,
+        ]}}}]
+
+    if climb_types is not None:
+        pipeline += [
+            {"$match": {"climb.climb_type_votes.value": {"$in": climb_types}}}
+        ]
+
+    if sort_by == SearchClimbsSort.distance:
+        pipeline += [{"$sort": {"distance": pymongo.ASCENDING}}]
+    elif sort_by == SearchClimbsSort.average_rating:
+        pipeline += [{"$sort": {"climb.average_rating": pymongo.DESCENDING}}]
 
     pipeline += [
         {"$skip": offset},
