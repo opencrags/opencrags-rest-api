@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Response, status, HTTPException, Query, Security
+from fastapi import APIRouter, Response, status, HTTPException, Depends, Security
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.testclient import TestClient
 from starlette.responses import RedirectResponse
@@ -11,7 +11,7 @@ import json
 import PIL
 from pydantic import BaseModel, validator, Field
 from enum import Enum
-from typing import List, Dict, Union, Literal, Optional, Any
+from typing import List, Tuple, Optional, Any
 import pymongo
 
 from app import mongo, GeoPoint
@@ -38,14 +38,8 @@ guest_auth = Auth0(
 
 router = APIRouter(
     tags=["utilities"],
+    dependencies=[Depends(auth.implicit_scheme)],
 )
-
-# mean stars
-# number of people who voted for stars?
-# most voted grade
-# number of people who voted for grade?
-# number of ascents
-# climb type
 
 
 def censor_votes(mongo_votes, user):
@@ -68,7 +62,7 @@ class SearchClimbsItem(BaseModel):
     coordinates: GeoPoint
 
 
-@router.get(
+@router.post(
     "/search-climbs",
     response_model=List[SearchClimbsItem],
     status_code=status.HTTP_200_OK,
@@ -77,7 +71,13 @@ def search_climbs(
     longitude: float,
     latitude: float,
     max_distance: Optional[float] = None,  # km
-    within_polygon: Optional[str] = None,
+    within_polygon: List[Tuple[float, float]] = None,
+    grade_ids: Optional[List[UUID]] = None,
+    minimum_average_rating: Optional[float] = None,
+    # minimum_grade_votes
+    # minimum_rating_votes
+    # minimum_ascents
+    # climb_type,
     # sort_by: str
     limit: int = 16,
     offset: int = 0,
@@ -105,20 +105,36 @@ def search_climbs(
                 "$geoWithin": {
                     "$geometry": {
                         "type": "Polygon",
-                        "coordinates": [json.loads(within_polygon)],
+                        "coordinates": [within_polygon],
                     }
                 }
             }
         }})
-    
+
     pipeline += [
         {"$lookup": {
             "from": "climbs",
             "localField": "id",
             "foreignField": "sector_id",
             "as": "climb",
-        }},
-        {"$unwind": "$climb"},
+        }}
+    ]
+
+    pipeline += [
+        {"$unwind": "$climb"}
+    ]
+
+    if grade_ids is not None:
+        pipeline += [
+            {"$match": {"climb.most_voted_grade": {"$in": grade_ids}}}
+        ]
+
+    if minimum_average_rating is not None:
+        pipeline += [
+            {"$match": {"climb.average_rating": {"$gte": minimum_average_rating}}}
+        ]
+
+    pipeline += [
         {"$skip": offset},
         {"$limit": limit},
     ]

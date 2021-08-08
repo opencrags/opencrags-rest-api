@@ -1,6 +1,21 @@
+from collections import defaultdict
 from uuid import UUID
 
-from app import create_api_router, VoteDefinition
+from app import create_api_router, VoteDefinition, VoteAggregation
+
+
+def most_voted(mongo_votes):
+    values = dict()
+    for mongo_vote in mongo_votes:
+        if mongo_vote["value"] in values:
+            values[mongo_vote["value"]] += 1
+        else:
+            values[mongo_vote["value"]] = 1
+    return max(values, key=values.get, default=None)
+
+
+def average(mongo_votes):
+    return sum([mongo_vote["value"] for mongo_vote in mongo_votes]) / len(mongo_votes)
 
 
 router, MainModel, vote_models = create_api_router(
@@ -22,12 +37,22 @@ router, MainModel, vote_models = create_api_router(
             collection_name="rating_votes",
             item_name="rating_vote",
             type=int,
+            aggregation=VoteAggregation(
+                fn=average,
+                name="average_rating",
+                type=float,
+            ),
         ),
         VoteDefinition(
             model_name="GradeVote",
             collection_name="grade_votes",
             item_name="grade_vote",
             type=UUID,
+            aggregation=VoteAggregation(
+                fn=most_voted,
+                name="most_voted_grade",
+                type=UUID,
+            ),
         ),
         VoteDefinition(
             model_name="ClimbTypeVote",

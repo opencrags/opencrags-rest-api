@@ -1,11 +1,9 @@
-from enum import unique
 import os
 from fastapi import APIRouter, status, HTTPException, Depends, Security
 from fastapi_auth0 import Auth0, Auth0User
 from uuid import UUID, uuid4
-import pymongo
 from pydantic import BaseModel
-from typing import List, Dict, Optional, Any, get_type_hints
+from typing import List, Dict, Optional, Any, Callable, get_type_hints
 from datetime import datetime
 from pydantic import BaseModel, create_model, conint
 
@@ -36,11 +34,17 @@ class ItemBase(BaseModel):
     created: datetime
 
 
+class VoteAggregation(BaseModel):
+    fn: Callable[[List], Any]
+    name: str
+    type: Any
+
 class VoteDefinition(BaseModel):
     model_name: str
     collection_name: str
     item_name: str
     type: Any
+    aggregation: Optional[VoteAggregation]
 
 
 def create_api_router(
@@ -85,6 +89,11 @@ def create_api_router(
         **{
             v.collection_name: (List[vote_models[v.model_name]], ...)
             for v in voted
+        },
+        **{
+            v.aggregation.name: (Optional[v.aggregation.type], None)
+            for v in voted
+            if v.aggregation is not None
         },
         __base__=ItemBase,
     )
@@ -212,6 +221,12 @@ def create_api_router(
         Vote = vote_models[voted_item.model_name]
         VoteIn = vote_in_models[voted_item.model_name]
 
+        def update_aggregation(item_id):
+            mongo_item = mongo.db[collection_name].find_one(dict(id=item_id))
+            aggregated_value = voted_item.aggregation.fn(mongo_item[voted_item.collection_name])
+            print("aggregated_value", aggregated_value, flush=True)
+            mongo.db[collection_name].update_one(dict(id=item_id), {"$set": {voted_item.aggregation.name: aggregated_value}})
+
         @router.post(
             f"/{collection_name}/{{item_id}}/{voted_item.collection_name}",
             response_model=Vote,
@@ -242,6 +257,8 @@ def create_api_router(
             )
 
             mongo.db[collection_name].update_one(dict(id=item_id), {"$push": {voted_item.collection_name: new_vote.dict()}})
+            if voted_item.aggregation is not None:
+                update_aggregation(item_id)
             return new_vote
 
         @router.delete(
@@ -275,6 +292,9 @@ def create_api_router(
 
             if update_result.modified_count == 0:
                 raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Failed to remove vote")
+
+            if voted_item.aggregation is not None:
+                update_aggregation(item_id)
 
             return {}
 

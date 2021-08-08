@@ -1,7 +1,9 @@
-from fastapi import APIRouter, Response, status, HTTPException, Query
+from fastapi import APIRouter, Response, status, HTTPException, Depends, Security
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.testclient import TestClient
 from starlette.responses import RedirectResponse
+from fastapi_auth0 import Auth0, Auth0User
+import os
 import re
 import io
 from uuid import UUID
@@ -14,9 +16,20 @@ from typing import List, Union, Literal, Optional
 
 from app import mongo
 
+auth = Auth0(
+    domain=os.environ["AUTH0_DOMAIN"],
+    api_audience=os.environ["AUTH0_API_AUDIENCE"],
+)
+
+guest_auth = Auth0(
+    domain=os.environ["AUTH0_DOMAIN"],
+    api_audience=os.environ["AUTH0_API_AUDIENCE"],
+    auto_error=False,
+)
 
 router = APIRouter(
     tags=["utilities"],
+    dependencies=[Depends(auth.implicit_scheme)],
 )
 
 
@@ -41,6 +54,7 @@ def search_crags_sectors_and_climbs_by_name(
     text: str,
     limit: int = 16,
     offset: int = 0,
+    user: Optional[Auth0User] = Security(guest_auth.get_user),
 ):  
     pattern = re.compile(f".*{text}.*", re.IGNORECASE)
     mongo_crags = list(mongo.db.crags.find({"name_votes.value": {"$regex": pattern}}).skip(offset).limit(limit))
