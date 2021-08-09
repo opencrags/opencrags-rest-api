@@ -60,6 +60,7 @@ class SearchClimbsItem(BaseModel):
     grade_votes: List[routers.climbs.vote_models["GradeVote"]]
     rating_votes: List[routers.climbs.vote_models["RatingVote"]]
     coordinates: GeoPoint
+    ascents: int
 
 
 class SearchClimbsSort(str, Enum):
@@ -81,7 +82,7 @@ def search_climbs(
     minimum_grade_votes: Optional[int] = None,
     minimum_average_rating: Optional[float] = None,
     minimum_rating_votes: Optional[int] = None,
-    # minimum_ascents
+    minimum_ascents: Optional[int] = None,
     climb_types: Optional[List[routers.climbs.ClimbType]] = None,
     sort_by: Optional[SearchClimbsSort] = SearchClimbsSort.distance,
     limit: int = 16,
@@ -156,6 +157,21 @@ def search_climbs(
             {"$match": {"climb.climb_type_votes.value": {"$in": climb_types}}}
         ]
 
+    pipeline += [
+        {"$lookup": {
+            "from": "ascents",
+            "localField": "climb.id",
+            "foreignField": "climb_id",
+            "as": "ascents",
+        }},
+        {"$set": {"ascents": {"$size": "$ascents"}}},
+    ]
+
+    if minimum_ascents is not None:
+        pipeline += [
+            {"$match": {"ascents": {"$gte": minimum_ascents}}}
+        ]
+
     if sort_by == SearchClimbsSort.distance:
         pipeline += [{"$sort": {"distance": pymongo.ASCENDING}}]
     elif sort_by == SearchClimbsSort.average_rating:
@@ -177,6 +193,7 @@ def search_climbs(
             grade_votes=censor_votes(mongo_climb_search_item["climb"]["grade_votes"], user),
             rating_votes=censor_votes(mongo_climb_search_item["climb"]["rating_votes"], user),
             coordinates=mongo_climb_search_item["coordinate_votes"]["value"],
+            ascents=mongo_climb_search_item["ascents"],
         ).dict()
         for mongo_climb_search_item in mongo_climb_search
         if len(mongo_climb_search_item["climb"]["name_votes"]) >= 1

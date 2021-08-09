@@ -1,6 +1,6 @@
 from typing import Optional
 from uuid import UUID
-from datetime import date
+from datetime import datetime
 from pydantic import conint
 
 from app import create_api_router
@@ -12,7 +12,7 @@ router, MainModel, vote_models = create_api_router(
     item_name="ascent",
     statics=dict(
         climb_id=UUID,
-        ascent_date=date,
+        ascent_date=datetime,
         flash=bool,
         attempts=Optional[conint(ge=1)],
         public=bool, # TODO: does this need to be a custom api?
