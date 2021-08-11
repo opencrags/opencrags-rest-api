@@ -24,7 +24,7 @@ from app.routers import (
 app = FastAPI(
     title="opencrags-rest-api",
     description=" ".join([
-        "Open database of boulder problems and lead routes. See",
+        "Open database of boulder problems and sport routes. See",
         "<a href='https://github.com/opencrags/opencrags-rest-api'>github</a>",
         "for more information.",
     ]),

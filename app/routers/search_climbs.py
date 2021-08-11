@@ -53,13 +53,15 @@ def censor_votes(mongo_votes, user):
 
 
 class SearchClimbsItem(BaseModel):
+    crag_id: UUID
     sector_id: UUID
     climb_id: UUID
     distance: float
     name_votes: List[routers.climbs.vote_models["ClimbNameVote"]]
+    climb_type_votes: List[routers.climbs.vote_models["ClimbTypeVote"]]
     grade_votes: List[routers.climbs.vote_models["GradeVote"]]
     rating_votes: List[routers.climbs.vote_models["RatingVote"]]
-    coordinates: GeoPoint
+    coordinates: Tuple[float, float]
     ascents: int
 
 
@@ -186,15 +188,16 @@ def search_climbs(
 
     return [
         SearchClimbsItem(
+            crag_id=mongo_climb_search_item["crag_id"],
             sector_id=mongo_climb_search_item["id"],
             climb_id=mongo_climb_search_item["climb"]["id"],
             distance=mongo_climb_search_item["distance"],
             name_votes=censor_votes(mongo_climb_search_item["climb"]["name_votes"], user),
+            climb_type_votes=censor_votes(mongo_climb_search_item["climb"]["climb_type_votes"], user),
             grade_votes=censor_votes(mongo_climb_search_item["climb"]["grade_votes"], user),
             rating_votes=censor_votes(mongo_climb_search_item["climb"]["rating_votes"], user),
-            coordinates=mongo_climb_search_item["coordinate_votes"]["value"],
+            coordinates=mongo_climb_search_item["coordinate_votes"]["value"]["coordinates"],
             ascents=mongo_climb_search_item["ascents"],
         ).dict()
         for mongo_climb_search_item in mongo_climb_search
-        if len(mongo_climb_search_item["climb"]["name_votes"]) >= 1
     ]
