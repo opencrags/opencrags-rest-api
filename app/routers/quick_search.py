@@ -15,6 +15,11 @@ from enum import Enum
 from typing import List, Union, Literal, Optional
 
 from app import mongo
+from app.routers import (
+    crags,
+    sectors,
+    climbs,
+)
 
 auth = Auth0(
     domain=os.environ["AUTH0_DOMAIN"],
@@ -33,6 +38,25 @@ router = APIRouter(
 )
 
 
+def censor_votes(mongo_votes, user):
+    mongo_votes = mongo_votes.copy()
+    return [
+        vote
+        if vote["public"] or (user is not None and vote["user_id"] == user.id)
+        else (vote.update(user_id=None) or vote)
+        for vote in mongo_votes
+    ]
+
+
+def censor_mongo_item(mongo_item, user):
+    print("censor", flush=True)
+    mongo_item = mongo_item.copy()
+    return {
+        key: censor_votes(value, user) if "votes" in key else value
+        for key, value in mongo_item.items()
+    }
+
+
 class QuickSearchResultItemType(str, Enum):
     crag = "crag"
     sector = "sector"
@@ -41,8 +65,9 @@ class QuickSearchResultItemType(str, Enum):
 
 class QuickSearchResultItem(BaseModel):
     type: QuickSearchResultItemType
-    id: UUID
-    name: str
+    crag: Optional[crags.MainModel]
+    sector: Optional[sectors.MainModel]
+    climb: Optional[climbs.MainModel]
 
 
 @router.get(
@@ -62,12 +87,7 @@ def search_crags_sectors_and_climbs_by_name(
     results = [
         QuickSearchResultItem(
             type=QuickSearchResultItemType.crag,
-            id=mongo_crag["id"],
-            name=[
-                name_vote["value"]
-                for name_vote in mongo_crag["name_votes"]
-                if pattern.match(name_vote["value"])
-            ][0],
+            crag=censor_mongo_item(mongo_crag, user),
         )
         for mongo_crag in mongo_crags
     ]
@@ -80,12 +100,7 @@ def search_crags_sectors_and_climbs_by_name(
         results += [
             QuickSearchResultItem(
                 type=QuickSearchResultItemType.sector,
-                id=mongo_sector["id"],
-                name=[
-                    name_vote["value"]
-                    for name_vote in mongo_sector["name_votes"]
-                    if pattern.match(name_vote["value"])
-                ][0],
+                sector=censor_mongo_item(mongo_sector, user),
             )
             for mongo_sector in mongo_sectors
         ]
@@ -97,12 +112,7 @@ def search_crags_sectors_and_climbs_by_name(
         results += [
             QuickSearchResultItem(
                 type=QuickSearchResultItemType.climb,
-                id=mongo_climb["id"],
-                name=[
-                    name_vote["value"]
-                    for name_vote in mongo_climb["name_votes"]
-                    if pattern.match(name_vote["value"])
-                ][0],
+                climb=censor_mongo_item(mongo_climb, user),
             )
             for mongo_climb in mongo_climbs
         ]
