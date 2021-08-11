@@ -107,7 +107,7 @@ def test_crag(auth):
         f"/quick-search?text=grädd",
     )
     assert response.status_code == 200
-    assert response.json()[0]["name"] == "Gräddhyllan"
+    assert response.json()[0]["sector"]["name_votes"][0]["value"] == "Gräddhyllan"
 
     response = authorized(
         client.post,
