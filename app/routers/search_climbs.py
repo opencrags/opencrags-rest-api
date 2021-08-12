@@ -196,7 +196,7 @@ def search_climbs(
             climb_type_votes=censor_votes(mongo_climb_search_item["climb"]["climb_type_votes"], user),
             grade_votes=censor_votes(mongo_climb_search_item["climb"]["grade_votes"], user),
             rating_votes=censor_votes(mongo_climb_search_item["climb"]["rating_votes"], user),
-            coordinates=mongo_climb_search_item["coordinate_votes"]["value"]["coordinates"],
+            coordinates=censor_votes(mongo_climb_search_item["coordinate_votes"]["value"]["coordinates"], user),
             ascents=mongo_climb_search_item["ascents"],
         ).dict()
         for mongo_climb_search_item in mongo_climb_search
