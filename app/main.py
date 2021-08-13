@@ -18,6 +18,7 @@ from app.routers import (
     quick_search,
     sectors,
     grades,
+    users,
 )
 
 
@@ -63,6 +64,7 @@ app.include_router(approaches.router)
 app.include_router(parkings.router)
 app.include_router(quick_search.router)
 app.include_router(search_climbs.router)
+app.include_router(users.router)
 
 
 if __name__ == "__main__":
