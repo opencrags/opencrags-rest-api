@@ -28,7 +28,7 @@ router, MainModel, vote_models = create_api_router(
         ),
         VoteDefinition(
             model_name="CragDescriptionVote",
-            collection_name="decription_votes",
+            collection_name="description_votes",
             item_name="description_vote",
             type=str,
         ),
