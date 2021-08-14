@@ -38,7 +38,7 @@ router = APIRouter(
 
 
 class UserIn(BaseModel):
-    display_name: str
+    display_name: Optional[str]
 
 
 class User(UserIn):
@@ -76,7 +76,7 @@ def view_user_info(
     mongo_user = mongo.db.users.find_one(dict(id=user_id))
 
     if mongo_user is None:
-        return Response(status_code=status.HTTP_404_NOT_FOUND)
+        return User(id=user_id, display_name=None)
     else:
         return User(**mongo_user)
 
