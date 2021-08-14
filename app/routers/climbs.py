@@ -94,7 +94,7 @@ router, MainModel, vote_models = create_api_router(
             type=str,  # TODO: draw area of eliminations?
         ),
         VoteDefinition(
-            model_name="DescriptionVote",
+            model_name="ClimbDescriptionVote",
             collection_name="description_votes",
             item_name="description_vote",
             type=str,
