@@ -20,5 +20,11 @@ router, MainModel, vote_models = create_api_router(
             item_name="banner_vote",
             type=UUID,
         ),
+        VoteDefinition(
+            model_name="AccessInformationVote",
+            collection_name="access_information_votes",
+            item_name="access_information_vote",
+            type=str,
+        ),
     ]
 )
