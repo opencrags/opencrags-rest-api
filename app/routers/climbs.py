@@ -15,7 +15,10 @@ def most_voted(mongo_votes):
 
 
 def average(mongo_votes):
-    return sum([mongo_vote["value"] for mongo_vote in mongo_votes]) / len(mongo_votes)
+    if len(mongo_votes) == 0:
+        return None
+    else:
+        return sum([mongo_vote["value"] for mongo_vote in mongo_votes]) / len(mongo_votes)
 
 
 class ClimbType(str, Enum):

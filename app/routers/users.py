@@ -14,6 +14,7 @@ from pydantic import BaseModel, validator, Field
 from typing import List, Dict, Union, Literal, Optional, Any
 from datetime import datetime
 from pydantic import BaseModel, create_model
+from starlette.status import HTTP_401_UNAUTHORIZED
 
 from app import mongo
 
@@ -52,10 +53,10 @@ class User(UserIn):
 )
 def add_user_info(
     user: UserIn,
-    user_: Optional[Auth0User] = Security(guest_auth.get_user)
+    auth0User: Optional[Auth0User] = Security(auth.get_user)
 ):
     user = User(
-        id=uuid4(),
+        id=auth0User.id,
         **user.dict(),
     )
     mongo.db.users.insert_one(user.dict())
@@ -70,7 +71,7 @@ def add_user_info(
 )
 def view_user_info(
     user_id: str,
-    user: Optional[Auth0User] = Security(guest_auth.get_user)
+    auth0User: Optional[Auth0User] = Security(guest_auth.get_user)
 ):
     mongo_user = mongo.db.users.find_one(dict(id=user_id))
 
@@ -89,9 +90,15 @@ def view_user_info(
 def update_user_info(
     user_id: str,
     user: UserIn,
-    user_: Optional[Auth0User] = Security(guest_auth.get_user)
+    auth0User: Optional[Auth0User] = Security(auth.get_user)
 ):
-    update_result = mongo.db.users.update_one(dict(id=user_id), user.dict())
+    if auth0User.id != user_id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=f"You are not allowed to update other users' settings")
+
+    update_result = mongo.db.users.update_one(
+        dict(id=user_id),
+        {"$set": {"display_name": user.display_name}},
+    )
 
     if update_result.matched_count == 0:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Unable to find user")
