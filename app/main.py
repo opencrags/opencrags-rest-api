@@ -8,16 +8,17 @@ import uvicorn
 
 from app.routers import (
     approaches,
-    parkings,
-    lines,
     ascents,
     climbs,
-    search_climbs,
+    crag_photos,
     crags,
-    images,
-    quick_search,
-    sectors,
     grades,
+    images,
+    lines,
+    parkings,
+    quick_search,
+    search_climbs,
+    sectors,
     users,
 )
 
@@ -57,6 +58,7 @@ app.include_router(crags.router)
 app.include_router(sectors.router)
 app.include_router(images.router)
 app.include_router(climbs.router)
+app.include_router(crag_photos.router)
 app.include_router(lines.router)
 app.include_router(ascents.router)
 app.include_router(grades.router)

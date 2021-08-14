@@ -26,5 +26,11 @@ router, MainModel, vote_models = create_api_router(
             item_name="access_information_vote",
             type=str,
         ),
+        VoteDefinition(
+            model_name="DescriptionVote",
+            collection_name="decription_votes",
+            item_name="description_vote",
+            type=str,
+        ),
     ]
 )
