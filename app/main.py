@@ -9,9 +9,11 @@ import uvicorn
 from app.routers import (
     approaches,
     ascents,
+    beta_videos,
     climbs,
     crag_photos,
     crags,
+    external_topo_links,
     grades,
     images,
     lines,
@@ -54,18 +56,20 @@ def get_api_version():
     return Path("VERSION").read_text()
 
 
-app.include_router(crags.router)
-app.include_router(sectors.router)
-app.include_router(images.router)
+app.include_router(approaches.router)
+app.include_router(ascents.router)
+app.include_router(beta_videos.router)
 app.include_router(climbs.router)
 app.include_router(crag_photos.router)
-app.include_router(lines.router)
-app.include_router(ascents.router)
+app.include_router(crags.router)
+app.include_router(external_topo_links.router)
 app.include_router(grades.router)
-app.include_router(approaches.router)
+app.include_router(images.router)
+app.include_router(lines.router)
 app.include_router(parkings.router)
 app.include_router(quick_search.router)
 app.include_router(search_climbs.router)
+app.include_router(sectors.router)
 app.include_router(users.router)
 
 

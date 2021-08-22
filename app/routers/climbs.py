@@ -106,18 +106,6 @@ router, MainModel, vote_models = create_api_router(
             item_name="broken_vote",
             type=bool,
         ),
-        VoteDefinition(
-            model_name="BetaVideoVote",
-            collection_name="beta_video_votes",
-            item_name="beta_video_vote",
-            type=str,
-        ),
-        VoteDefinition(
-            model_name="ExternalLinkVote",
-            collection_name="external_link_votes",
-            item_name="external_link_vote",
-            type=str,
-        ),
         # guide book grade?
         # first ascent grade?
         # point to other page with information?
