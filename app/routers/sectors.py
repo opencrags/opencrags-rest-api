@@ -33,9 +33,9 @@ router, MainModel, vote_models = create_api_router(
             type=GeoPoint,
         ),
         VoteDefinition(
-            model_name="SectorBannerVote",
-            collection_name="banner_votes",
-            item_name="banner_vote",
+            model_name="SectorThumbnailVote",
+            collection_name="sector_thumbnail_votes",
+            item_name="sector_thumbnail_vote",
             type=UUID,
         ),
     ],

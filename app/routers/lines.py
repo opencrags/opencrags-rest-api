@@ -6,8 +6,7 @@ from typing import List
 from app import create_api_router, VoteDefinition, mongo
 
 
-# TODO: only allow one line per image + climb
-# TODO: check that image + climb belong to the sector
+# TODO: check that image + climb belong to the same sector
 
 class LineNode(BaseModel):
     x: float
