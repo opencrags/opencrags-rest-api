@@ -13,8 +13,7 @@ router, MainModel, vote_models = create_api_router(
     statics=dict(
         climb_id=UUID,
         ascent_date=datetime,
-        flash=bool,
-        attempts=Optional[conint(ge=1)],
+        attempts=conint(ge=1),
         public=bool, # TODO: does this need to be a custom api?
     ),
 )
