@@ -1,5 +1,6 @@
 from enum import Enum
 from uuid import UUID
+from pydantic.types import constr
 
 from app import create_api_router, VoteDefinition, VoteAggregation
 
@@ -45,7 +46,7 @@ router, MainModel, vote_models = create_api_router(
             model_name="ClimbNameVote",
             collection_name="name_votes",
             item_name="name_vote",
-            type=str,
+            type=constr(min_length=2, strip_whitespace=True),
         ),
         VoteDefinition(
             model_name="RatingVote",

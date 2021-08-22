@@ -1,4 +1,5 @@
 from uuid import UUID
+from pydantic.types import constr
 from typing import List
 
 from app import GeoPoint, create_api_router, VoteDefinition
@@ -18,7 +19,7 @@ router, MainModel, vote_models = create_api_router(
             model_name="SectorNameVote",
             collection_name="name_votes",
             item_name="name_vote",
-            type=str,
+            type=constr(min_length=2, strip_whitespace=True),
         ),
         VoteDefinition(
             model_name="GuideImagesVote",
