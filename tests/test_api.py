@@ -45,7 +45,7 @@ def test_guest_query():
 
     for crag in response.json():
         for vote in crag["name_votes"]:
-            assert vote["public"] or vote["user_id"] == None
+            assert vote["public"] or vote["user_id"] is None
     
     return response
 

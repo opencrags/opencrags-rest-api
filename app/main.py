@@ -81,5 +81,4 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    # uvicorn.run(cors, host=args.host, port=args.port, reload=args.reload)
     uvicorn.run("app.main:cors", host=args.host, port=args.port, reload=args.reload)
