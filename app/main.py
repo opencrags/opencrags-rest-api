@@ -11,6 +11,7 @@ from app.routers import (
     ascents,
     beta_videos,
     climbs,
+    comments,
     crag_photos,
     crags,
     external_topo_links,
@@ -60,6 +61,7 @@ app.include_router(approaches.router)
 app.include_router(ascents.router)
 app.include_router(beta_videos.router)
 app.include_router(climbs.router)
+app.include_router(comments.router)
 app.include_router(crag_photos.router)
 app.include_router(crags.router)
 app.include_router(external_topo_links.router)
