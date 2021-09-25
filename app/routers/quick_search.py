@@ -1,24 +1,17 @@
-from fastapi import APIRouter, Response, status, HTTPException, Depends, Security
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.testclient import TestClient
-from starlette.responses import RedirectResponse
+from fastapi import APIRouter, status, Depends, Security
 from fastapi_auth0 import Auth0, Auth0User
 import os
 import re
-import io
-from uuid import UUID
-import base64
-import json
-import PIL
-from pydantic import BaseModel, validator, Field
+from pydantic import BaseModel
 from enum import Enum
-from typing import List, Union, Literal, Optional
+from typing import List, Optional
 
 from app import mongo
 from app.routers import (
     crags,
     sectors,
     climbs,
+    users,
 )
 
 auth = Auth0(
@@ -49,7 +42,6 @@ def censor_votes(mongo_votes, user):
 
 
 def censor_mongo_item(mongo_item, user):
-    print("censor", flush=True)
     mongo_item = mongo_item.copy()
     return {
         key: censor_votes(value, user) if "votes" in key else value
@@ -61,6 +53,7 @@ class QuickSearchResultItemType(str, Enum):
     crag = "crag"
     sector = "sector"
     climb = "climb"
+    user = "user"
 
 
 class QuickSearchResultItem(BaseModel):
@@ -68,6 +61,7 @@ class QuickSearchResultItem(BaseModel):
     crag: Optional[crags.MainModel]
     sector: Optional[sectors.MainModel]
     climb: Optional[climbs.MainModel]
+    user: Optional[users.User]
 
 
 @router.get(
@@ -75,7 +69,7 @@ class QuickSearchResultItem(BaseModel):
     response_model=List[QuickSearchResultItem],
     status_code=status.HTTP_200_OK,
 )
-def search_crags_sectors_and_climbs_by_name(
+def search_crags_sectors_climbs_and_users_by_name(
     text: str,
     limit: int = 16,
     offset: int = 0,
@@ -115,6 +109,18 @@ def search_crags_sectors_and_climbs_by_name(
                 climb=censor_mongo_item(mongo_climb, user),
             )
             for mongo_climb in mongo_climbs
+        ]
+        offset = max(0, offset - len(mongo_climbs))
+        limit -= len(mongo_climbs)
+
+    if limit >= 1:
+        mongo_users = list(mongo.db.users.find({"display_name": {"$regex": pattern}}).skip(offset).limit(limit))
+        results += [
+            QuickSearchResultItem(
+                type=QuickSearchResultItemType.user,
+                user=mongo_user,
+            )
+            for mongo_user in mongo_users
         ]
 
     return results
