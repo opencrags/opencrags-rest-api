@@ -39,8 +39,8 @@ def test_unauthorized():
     assert response.status_code == 403
 
 
-def test_guest_query():
-    response = client.post("/crags/query", json=dict())
+def guest_query(user_id):
+    response = client.post("/crags/query", json=dict(user_id=user_id))
     assert response.status_code == 200
 
     for crag in response.json():
@@ -55,11 +55,13 @@ def test_crag(auth):
 
     authorized = authorized_factory(auth)
 
+    user = authorized(client.get, "/users/me").json()
+
     response = authorized(client.post, "/crags", json=dict())
     assert response.status_code == 201
     crag_id = response.json()["id"]
 
-    assert len(test_guest_query().json()) == 1
+    assert len(guest_query(user["id"]).json()) == 1
 
     response = authorized(
         client.post,
@@ -72,7 +74,7 @@ def test_crag(auth):
     assert response.status_code == 201
     vote_id = response.json()["id"]
 
-    assert test_guest_query().json()[0]["name_votes"][0]["value"] == "Fagerdala"
+    assert guest_query(user["id"]).json()[0]["name_votes"][0]["value"] == "Fagerdala"
 
     response = authorized(
         client.put,
@@ -84,13 +86,13 @@ def test_crag(auth):
     )
     assert response.status_code == 200
 
-    assert test_guest_query().json()[0]["name_votes"][0]["value"] == "Houdini"
+    assert guest_query(user["id"]).json()[0]["name_votes"][0]["value"] == "Houdini"
 
     response = authorized(client.post, "/sectors", json=dict(crag_id=crag_id))
     assert response.status_code == 201
     sector_id = response.json()["id"]
 
-    assert len(test_guest_query().json()) == 1
+    assert len(guest_query(user["id"]).json()) == 1
 
     response = authorized(
         client.post,

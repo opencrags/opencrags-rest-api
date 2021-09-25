@@ -71,13 +71,6 @@ def censor_ascent(mongo_ascent, user):
     }
 
 
-def is_optional(t):
-    return (
-        typing.get_origin(t) is Union
-        and typing.get_args(t)[-1] is type(None)
-    )
-
-
 AscentQuery = create_model(
     "AscentQuery",
     **{

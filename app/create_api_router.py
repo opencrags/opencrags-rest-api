@@ -32,7 +32,7 @@ def rename(name):
 def is_optional(t):
     return (
         typing.get_origin(t) is Union
-        and typing.get_args(t)[-1] is type(None)
+        and type(None) in typing.get_args(t)
     )
 
 
@@ -114,6 +114,14 @@ def create_api_router(
         },
     )
 
+    Query = create_model(
+        f"{model_name}Query",
+        **{
+            name: (Optional[field.type_], None)
+            for name, field in MainModel.__fields__.items()
+        },
+    )
+
     def censor_item(mongo_item, user):
         mongo_item = mongo_item.copy()
         mongo_item.update(**{
@@ -134,18 +142,17 @@ def create_api_router(
     )
     @rename(f"query_{collection_name}")
     def query_collection(
-        query: Dict[str, Any],
+        query: Query,
         limit: Optional[conint(ge=1, le=100)] = 20,
         offset: Optional[conint(ge=0)] = 0,
         user: Optional[Auth0User] = Security(guest_auth.get_user),
     ):
-        type_hints = get_type_hints(MainModel)
-        query = {
-            key: type_hints.get(key, str)(value)
-            for key, value in query.items()
-        }
-
-        mongo_items = mongo.db[collection_name].find(query).skip(offset).limit(limit)
+        mongo_items = (
+            mongo.db[collection_name]
+            .find(query.dict(exclude_none=True))
+            .skip(offset)
+            .limit(limit)
+        )
 
         return [
             MainModel(**censor_item(mongo_item, user))
