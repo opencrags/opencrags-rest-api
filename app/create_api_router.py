@@ -3,7 +3,8 @@ from fastapi import APIRouter, status, HTTPException, Depends, Security
 from fastapi_auth0 import Auth0, Auth0User
 from uuid import UUID, uuid4
 from pydantic import BaseModel
-from typing import List, Dict, Optional, Any, Callable, get_type_hints
+import typing
+from typing import List, Dict, Union, Optional, Any, Callable, get_type_hints
 from datetime import datetime
 from pydantic import BaseModel, create_model, conint
 
@@ -26,6 +27,13 @@ def rename(name):
         fn.__name__ = name
         return fn
     return decorator
+
+
+def is_optional(t):
+    return (
+        typing.get_origin(t) is Union
+        and typing.get_args(t)[-1] is type(None)
+    )
 
 
 class ItemBase(BaseModel):
@@ -83,7 +91,7 @@ def create_api_router(
     MainModel = create_model(
         model_name,
         **{
-            name: (t, ...)
+            name: (t, None) if is_optional(t) else (t, ...)
             for name, t in statics.items()
         },
         **{

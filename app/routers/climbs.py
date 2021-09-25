@@ -1,6 +1,6 @@
 from enum import Enum
 from uuid import UUID
-from pydantic.types import constr
+from pydantic.types import constr, conint
 
 from app import create_api_router, VoteDefinition, VoteAggregation
 
@@ -46,13 +46,13 @@ router, MainModel, vote_models = create_api_router(
             model_name="ClimbNameVote",
             collection_name="name_votes",
             item_name="name_vote",
-            type=constr(min_length=2, strip_whitespace=True),
+            type=constr(min_length=1, strip_whitespace=True),
         ),
         VoteDefinition(
             model_name="RatingVote",
             collection_name="rating_votes",
             item_name="rating_vote",
-            type=int,
+            type=conint(ge=0, le=5),
             aggregation=VoteAggregation(
                 fn=average,
                 name="average_rating",
@@ -80,25 +80,25 @@ router, MainModel, vote_models = create_api_router(
             model_name="SitStartVote",
             collection_name="sit_start_votes",
             item_name="sit_start_vote",
-            type=str,
+            type=constr(min_length=1, strip_whitespace=True),
         ),
         VoteDefinition(
             model_name="DefinedStartVote",
             collection_name="defined_start_votes",
             item_name="defined_start_vote",
-            type=str,
+            type=constr(min_length=1, strip_whitespace=True),
         ),
         VoteDefinition(
             model_name="EliminationsVote",
             collection_name="eliminations_votes",
             item_name="eliminations_vote",
-            type=str,  # TODO: draw area of eliminations?
+            type=constr(min_length=1, strip_whitespace=True),  # TODO: draw area of eliminations?
         ),
         VoteDefinition(
             model_name="ClimbDescriptionVote",
             collection_name="description_votes",
             item_name="description_vote",
-            type=str,
+            type=constr(min_length=1, strip_whitespace=True),
         ),
         VoteDefinition(
             model_name="BrokenVote",

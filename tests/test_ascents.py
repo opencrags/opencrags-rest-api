@@ -15,7 +15,7 @@ client = TestClient(main.app)
 @pytest.fixture
 def auth():
     return requests.post(
-        f"https://{os.environ['AUTH0_DOMAIN']}/oauth/token",
+        f"""https://{os.environ["AUTH0_DOMAIN"]}/oauth/token""",
         headers={"content-type": "application/json"},
         data=Path("tests/auth.json").read_text(),
     ).json()
@@ -26,7 +26,7 @@ def authorized_factory(auth):
         return fn(
             *args,
             **kwargs,
-            headers={"authorization": f"Bearer {auth['access_token']}"}
+            headers={"authorization": f"""Bearer {auth["access_token"]}"""}
         )
     return authorized
 
@@ -36,8 +36,8 @@ def drop_database():
     client.drop_database("opencrags")
 
 
-def guest_query():
-    response = client.post("/ascents/query", json=dict())
+def guest_query(user_id):
+    response = client.post("/ascents/query", json=dict(user_id=user_id))
     assert response.status_code == 200
 
     for ascent in response.json():
@@ -51,6 +51,8 @@ def test_ascents(auth):
 
     authorized = authorized_factory(auth)
 
+    user = authorized(client.get, "/users/me").json()
+
     response = authorized(client.post, "/ascents", json=dict(
         climb_id=str(uuid4()),
         ascent_date=str(datetime.now()),
@@ -59,7 +61,7 @@ def test_ascents(auth):
     assert response.status_code == 201
     ascent_id = response.json()["id"]
 
-    assert len(guest_query().json()) == 1
+    assert len(guest_query(user["id"]).json()) == 1
 
     response = authorized(
         client.put,

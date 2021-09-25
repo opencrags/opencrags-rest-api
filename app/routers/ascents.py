@@ -4,10 +4,11 @@ from fastapi import APIRouter, status, HTTPException, Depends, Security
 from fastapi_auth0 import Auth0, Auth0User
 from uuid import UUID, uuid4
 from pydantic import BaseModel
-from typing import List, Dict, Optional, Any, get_type_hints
+import typing
+from typing import List, Dict, Union, Optional, Any, get_type_hints
 from datetime import datetime
 from enum import Enum
-from pydantic import BaseModel, conint
+from pydantic import BaseModel, conint, create_model
 
 from app import mongo
 
@@ -70,25 +71,39 @@ def censor_ascent(mongo_ascent, user):
     }
 
 
+def is_optional(t):
+    return (
+        typing.get_origin(t) is Union
+        and typing.get_args(t)[-1] is type(None)
+    )
+
+
+AscentQuery = create_model(
+    "AscentQuery",
+    **{
+        name: (Optional[field.type_], None)
+        for name, field in Ascent.__fields__.items()
+    },
+)
+
+
 @router.post(
     "/ascents/query",
     response_model=List[Ascent],
     status_code=status.HTTP_200_OK,
 )
 def query_ascents(
-    query: Dict[str, Any],
+    query: AscentQuery,
     limit: Optional[conint(ge=1, le=100)] = 20,
     offset: Optional[conint(ge=0)] = 0,
     user: Optional[Auth0User] = Security(guest_auth.get_user),
 ):
-    type_hints = get_type_hints(Ascent)
-    query = {
-        key: type_hints.get(key, str)(value)
-        for key, value in query.items()
-    }
-
-    mongo_items = mongo.db.ascents.find(query).skip(offset).limit(limit)
-
+    mongo_items = (
+        mongo.db.ascents
+        .find(query.dict(exclude_none=True))
+        .skip(offset)
+        .limit(limit)
+    )
     return [
         Ascent(**censor_ascent(mongo_item, user))
         for mongo_item in mongo_items

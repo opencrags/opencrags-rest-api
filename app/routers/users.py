@@ -11,7 +11,7 @@ import base64
 import json
 import PIL
 from pydantic import BaseModel, validator, Field
-from typing import List, Dict, Union, Literal, Optional, Any
+from typing import Optional, Any
 from datetime import datetime
 from pydantic import BaseModel, create_model
 from starlette.status import HTTP_401_UNAUTHORIZED
@@ -53,14 +53,26 @@ class User(UserIn):
 )
 def add_user_info(
     user: UserIn,
-    auth0User: Optional[Auth0User] = Security(auth.get_user)
+    auth0_user: Optional[Auth0User] = Security(auth.get_user)
 ):
     user = User(
-        id=auth0User.id,
+        id=auth0_user.id,
         **user.dict(),
     )
     mongo.db.users.insert_one(user.dict())
     return user
+
+
+@router.get(
+    "/users/me",
+    response_model=User,
+    status_code=status.HTTP_200_OK,
+    dependencies=[Depends(auth.implicit_scheme)],
+)
+def view_my_user_info(
+    auth0_user: Optional[Auth0User] = Security(guest_auth.get_user)
+):
+    return view_user_info(auth0_user.id, auth0_user)
 
 
 @router.get(
@@ -71,7 +83,7 @@ def add_user_info(
 )
 def view_user_info(
     user_id: str,
-    auth0User: Optional[Auth0User] = Security(guest_auth.get_user)
+    auth0_user: Optional[Auth0User] = Security(guest_auth.get_user)
 ):
     mongo_user = mongo.db.users.find_one(dict(id=user_id))
 
@@ -90,9 +102,9 @@ def view_user_info(
 def update_user_info(
     user_id: str,
     user: UserIn,
-    auth0User: Optional[Auth0User] = Security(auth.get_user)
+    auth0_user: Optional[Auth0User] = Security(auth.get_user)
 ):
-    if auth0User.id != user_id:
+    if auth0_user.id != user_id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=f"You are not allowed to update other users' settings")
 
     update_result = mongo.db.users.update_one(
