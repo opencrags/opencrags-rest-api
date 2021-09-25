@@ -48,10 +48,11 @@ def test_comments(auth):
 
     authorized = authorized_factory(auth)
 
-    related_id = str(uuid4())
+    related_id = authorized(client.post, "/crags", json=dict()).json()["id"]
 
     response = authorized(client.post, "/comments", json=dict(
-        related_ids=[related_id],
+        related_id=related_id,
+        related_type="crag",
         comment="first!",
     ))
     assert response.status_code == 201
@@ -59,25 +60,23 @@ def test_comments(auth):
 
     assert len(guest_query(related_id).json()) == 1
 
-    response = authorized(client.post, "/comments", json=dict(
-        related_ids=[related_id],
-        comment="first!",
+    response = authorized(client.post, f"/comments/{comment_id}/replies", json=dict(
+        comment_id=comment_id,
+        reply="seconnd!",
     ))
     assert response.status_code == 201
-    second_comment_id = response.json()["id"]
-
-    assert len(guest_query(related_id).json()) == 2
+    reply_id = response.json()["id"]
 
     response = authorized(
         client.put,
-        f"/comments/{second_comment_id}",
-        json=dict(
-            comment="second!"
-        ),
+        f"/comments/{comment_id}/replies/{reply_id}",
+        json=dict(reply="second!"),
     )
     assert response.status_code == 200
+    
+    assert guest_query(related_id).json()[0]["replies"][0]["reply"] == "second!"
 
     response = authorized(client.delete, f"/comments/{comment_id}")
-    assert response.status_code == 200
+    assert response.status_code == 403
 
     assert len(guest_query(related_id).json()) == 1

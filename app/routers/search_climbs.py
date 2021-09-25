@@ -1,29 +1,14 @@
-from fastapi import APIRouter, Response, status, HTTPException, Depends, Security
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.testclient import TestClient
-from starlette.responses import RedirectResponse
+import os
+from fastapi import APIRouter, status, Depends, Security
 from fastapi_auth0 import Auth0, Auth0User
-import re
-import io
 from uuid import UUID
-import base64
-import json
-import PIL
-from pydantic import BaseModel, validator, Field
+from pydantic import BaseModel, confloat
 from enum import Enum
-from typing import List, Tuple, Optional, Any
+from typing import List, Tuple, Optional
 import pymongo
 
-from app import mongo, GeoPoint
-import os
-
-from fastapi import APIRouter, Response, status
-from uuid import UUID, uuid4
-from pydantic import BaseModel
-from typing import List, Optional
-from pydantic import BaseModel
-
 from app import mongo, routers
+
 
 auth = Auth0(
     domain=os.environ["AUTH0_DOMAIN"],
@@ -78,7 +63,7 @@ class SearchClimbsSort(str, Enum):
 def search_climbs(
     longitude: float,
     latitude: float,
-    max_distance: Optional[float] = None,  # km
+    max_distance: Optional[confloat(gt=0)] = None,  # km
     within_polygon: List[Tuple[float, float]] = None,
     grade_ids: Optional[List[UUID]] = None,
     minimum_grade_votes: Optional[int] = None,
