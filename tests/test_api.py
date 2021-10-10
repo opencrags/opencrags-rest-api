@@ -121,3 +121,10 @@ def test_crag(auth):
     )
     response = authorized(client.delete, f"/crags/{crag_id}")
     assert response.status_code == 200
+
+    response = authorized(client.post, "/crags", json=dict())
+    assert response.status_code == 201
+    crag_id2 = response.json()["id"]
+
+    response = authorized(client.put, f"/sectors/{sector_id}", json=dict(crag_id=crag_id2))
+    assert response.status_code == 200

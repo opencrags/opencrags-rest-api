@@ -40,6 +40,7 @@ class ItemBase(BaseModel):
     id: UUID
     user_id: str
     created: datetime
+    updated: datetime
 
 
 class VoteAggregation(BaseModel):
@@ -176,12 +177,38 @@ def create_api_router(
             id=uuid4(),
             user_id=user.id,
             created=datetime.utcnow(),
+            updated=datetime.utcnow(),
             **model_in.dict(),
             **{v.collection_name: list() for v in voted},
         )
         mongo.db[collection_name].insert_one(item.dict())
 
         return item
+
+    @router.put(
+        f"/{collection_name}/{{item_id}}",
+        response_model=MainModel,
+        status_code=status.HTTP_200_OK,
+        dependencies=[Depends(auth.implicit_scheme)],
+    )
+    @rename(f"update_{item_name}")
+    def update_item(
+        item_id: UUID,
+        model_in: MainModelIn,
+        user: Auth0User = Security(auth.get_user),
+    ):
+        mongo_item = mongo.db[collection_name].find_one(dict(id=item_id))
+
+        if mongo_item is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"No {item_name} with that id")
+
+        if mongo_item["user_id"] != user.id:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=f"Item {item_name} has another owner")
+
+        mongo_item.update(**model_in.dict())
+        mongo_item.update(updated=datetime.utcnow())
+        mongo.db[collection_name].replace_one({"id": item_id}, mongo_item)
+        return mongo_item
 
     # TODO: need to create functions dynamically if we want custom argument names
 
