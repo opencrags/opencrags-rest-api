@@ -18,4 +18,4 @@ services:
     command: ["/root/.poetry/bin/poetry", "run", "pytest", "tests", "-v", "-s"]
 
   opencrags-mongodb:
-    image: mongo:4.4.5
+    image: mongo:4.4.8

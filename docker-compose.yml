@@ -14,9 +14,11 @@ services:
     ports:
       - '8000:8000'
     environment:
-      DB: "mongodb://opencrags-mongodb:27017"
-    env_file:
-      - dev.env
+      DB: "mongodb://trafikverket-wire-annotation-backend-mongodb-dev:27017"
+      AUTH_OPENID_CONNECT_URL: "https://auth.opencrags.com/auth/realms/opencrags/.well-known/openid-configuration"
+      AUTH_ISSUER: "https://auth.opencrags.com/auth/realms/opencrags"
+      AUTH_CLIENT_ID: "opencrags"
+      ADMIN_USERS_URL: "https://auth.opencrags.com/auth/admin/realms/opencrags/users"
     command: ["/root/.poetry/bin/poetry", "run", "python", "-m", "app.main", "--host", "0.0.0.0", "--port", "8000", "--reload"]
 
   opencrags-mongodb:
